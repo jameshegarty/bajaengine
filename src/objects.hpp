@@ -13,9 +13,11 @@
 #endif
 
 #include "HelperLibString.hpp"
-#include "collision.hpp"
-#include "Containers.hpp"
+#include "collision/collision.hpp"
+#include "Helperlib/Containers.hpp"
 #include "Types.hpp"
+#include "animation.hpp"
+#include "envelope.hpp"
 #include "os.h"
 
 #ifdef ODE
@@ -272,6 +274,9 @@ class Object{
 		unsigned int* glListNameEnvelope;
 
 		void CheckCollision(TCollisionPacket* colPackage);
+
+		Array<ObjectAnimation> animations;
+		Array<ObjectEnvelope> envelopes;
 
 		Vertex& getVertex(int id);
 		Vertex& getVertexRaw(int id);

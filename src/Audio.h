@@ -3,13 +3,13 @@
 
 #include <al.h>
 
-#include "os.h"
-#include "HelperLibString.hpp"
-#include "Containers.hpp"
+#include "../os.h"
+#include "../HelperLibString.hpp"
+#include "../Helperlib/Containers.hpp"
 
-extern "C"{
+
 #include <vorbis/vorbisfile.h>
-}
+
 
 /*
 VOLUMES go from 0-1 NOT 0-100!!!!!!!!!!!!!

@@ -1,6 +1,7 @@
 #include "GlHeader.hpp"
 										
 #include "draw.hpp"
+#include "DrawDynamic.h"
 #include "level.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -9,11 +10,12 @@
 #include "hardware.hpp"
 #include "random.h"
 
-#include "Log.hpp"
-#include "sort.hpp"
-#include "HelperLibMath.hpp"
+#include "Helperlib/Log.hpp"
+#include "Helperlib/sort.hpp"
+#include "Helperlib/HelperLibMath.hpp"
 
 #include "lightmap.h"
+#include "editor.h"
 #include "timeing.hpp"
 
 #ifdef _WIN32
@@ -167,8 +169,33 @@ void drawLevel(){
 
 	level->fog.update();
 
-  drawModern();
+	if(conf->optimize=="none"){
+		drawArray(&level->staticObjects,true);
+		drawArray(&level->nonstaticObjects,true);
+	}else if(conf->optimize=="list"){
 
+		if(!listBuild  || level!=lastLevel){
+			buildStaticList();
+			listBuild=true;
+			lastLevel=level;
+		}
+
+		drawStaticList();
+
+		buildNonstaticList();
+		drawNonstaticList();
+	}else if(conf->optimize=="modern"){
+		drawModern();
+	}else if(conf->optimize=="vbo"){
+		buildVBOs();
+		drawVBOs();
+	}
+
+	for(int i=0; i<level->hair.size(); i++){
+		if(level->hair[i]->visible){
+			level->hair[i]->draw();
+		}
+	}
 
 	for(int i=0; i<level->points.size(); i++){
 		if(level->points[i]->visible){
@@ -210,6 +237,11 @@ void drawLevel(){
 		}
 	}
 
+	for(int i=0; i<level->particles.size(); i++){
+		if(level->particles[i]->visible){
+			level->particles[i]->draw();
+		}
+	}
 
 	if(conf->normals){
 		drawNormals();

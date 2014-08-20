@@ -1,17 +1,18 @@
 #include "Types.hpp"
 
 #include <iostream>
-#include "HelperLibMath.hpp"
+#include "Helperlib/HelperLibMath.hpp"
 #include "conf.h"
 #include "SceneGraph.hpp"
 #include "texture.hpp"
+#include "textureLibrary.h"
 
 #ifndef XSICONVERT
 	#include "level.hpp"
 
 	#include "GlHeader.hpp"
 	
-	#include "Log.hpp"
+	#include "Helperlib/Log.hpp"
 	#include "os.h"
 #endif
 
@@ -775,6 +776,10 @@ void Object::update(){
 		int i=level->colliders.find(this);
 		int j=level->dynamicObjects.find(this);
 
+		if(j==-1){
+			physics.registerObject(this);
+		}
+
 		if(i==-1){
 			level->colliders.pushBack(this);
 		}
@@ -789,6 +794,10 @@ void Object::update(){
 
 		if(i>-1){
 			level->colliders.erase(i);
+		}
+
+		if(j==-1){
+			physics.removeObject(this);
 		}
 
 
@@ -816,7 +825,9 @@ void Object::update(){
 		int i=level->dynamicObjects.find(this);
 		int j=level->colliders.find(this);
 
-
+		if(j==-1){
+			physics.registerObject(this);
+		}
 
 		if(i==-1){
 			level->dynamicObjects.pushBack(this);
@@ -829,6 +840,9 @@ void Object::update(){
 		int i=level->dynamicObjects.find(this);
 		int j=level->colliders.find(this);
 
+		if(j==-1){
+			physics.removeObject(this);
+		}
 
 		if(i>-1){
 
@@ -843,6 +857,120 @@ void Object::update(){
 			//environment mapped objects need to be redrawn every frame so that the texcoords update
 
 			//dirty=true;
+		}
+	}
+
+	if(envelopeVertices==NULL && envelopes.size()>0){
+
+		if(envelopes.size()>ikSplit){
+ 
+			Array<Array<Vertex*> > vertexLists;
+			Array<Array<int> > vertexEnvLists;
+
+			Array<int> envList;
+			Array<int> notfound;
+
+			for(int i=0; i<vertices.size(); i+=3){
+				envList.clear();
+
+				for(int j=0; j<envelopes.size(); j++){
+					if(vertices[i].envelope[j]>0 && envList.find(j)==-1){
+						envList.pushBack(j);
+					}
+				}
+
+				for(int j=0; j<envelopes.size(); j++){
+					if(vertices[i+1].envelope[j]>0 && envList.find(j)==-1){
+						envList.pushBack(j);
+					}
+				}
+
+				for(int j=0; j<envelopes.size(); j++){
+					if(vertices[i+2].envelope[j]>0 && envList.find(j)==-1){
+						envList.pushBack(j);
+					}
+				}
+
+				
+				int appendNoExpand=-1;
+				int appendExpand=-1;
+
+				for(int j=0; j<vertexEnvLists.size(); j++){
+
+					notfound.clear();
+
+					for(int l=0; l<envList.size(); l++){
+						if(vertexEnvLists[j].find(envList[l])==-1){
+							notfound.pushBack(envList[l]);
+						}
+					}
+
+					if(notfound.size()==0){
+						appendNoExpand=j;
+						break;
+					}else{
+
+						if( (notfound.size()+vertexEnvLists[j].size()) <= ikSplit){
+
+							appendExpand=j;
+						}
+					}
+				}
+
+				if(appendNoExpand!=-1){
+					vertexLists[appendNoExpand].pushBack(&vertices[i]);
+					vertexLists[appendNoExpand].pushBack(&vertices[i+1]);
+					vertexLists[appendNoExpand].pushBack(&vertices[i+2]);
+				}else if(appendExpand!=-1){
+					vertexLists[appendExpand].pushBack(&vertices[i]);
+					vertexLists[appendExpand].pushBack(&vertices[i+1]);
+					vertexLists[appendExpand].pushBack(&vertices[i+2]);
+
+					for(int r=0; r<notfound.size(); r++){
+						vertexEnvLists[appendExpand].pushBack(notfound[r]);
+					}
+				}else{
+					vertexLists.pushBack();
+					vertexLists[vertexLists.size()-1].pushBack(&vertices[i]);
+					vertexLists[vertexLists.size()-1].pushBack(&vertices[i+1]);
+					vertexLists[vertexLists.size()-1].pushBack(&vertices[i+2]);
+					vertexEnvLists.pushBack();
+
+					for(int p=0; p<envList.size(); p++){
+						vertexEnvLists[vertexEnvLists.size()-1].pushBack(envList[p]);
+					}
+				}
+			}
+
+			
+			envelopeVertices=new Array<Vertex*>[vertexLists.size()];
+			envelopeVerticesEnvelopes=new Array<int>[vertexLists.size()];
+			envelopeVerticesCount=vertexLists.size();
+
+			for(int i=0; i<vertexLists.size(); i++){
+				vertexLists[i][0]->end=START_TRI;
+				vertexLists[i][vertexLists[i].size()-1]->end=END_TRI;
+
+				//do a stupid sort on the envLists
+
+				bool done=false;
+
+				while(!done){
+					done=true;
+
+					for(int k=1; k < vertexEnvLists[i].size(); k++){
+						if(vertexEnvLists[i][k]<vertexEnvLists[i][k-1]){
+							int t=vertexEnvLists[i][k-1];
+							vertexEnvLists[i][k-1]=vertexEnvLists[i][k];
+							vertexEnvLists[i][k]=t;
+							done=false;
+						}
+					}
+				}
+
+				envelopeVertices[i]=vertexLists[i];
+				envelopeVerticesEnvelopes[i]=vertexEnvLists[i];
+			}
 		}
 	}
 

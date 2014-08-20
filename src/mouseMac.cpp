@@ -6,7 +6,7 @@
 #include "timeing.hpp"
 #include "os.h"
 
-#include "Log.hpp"
+#include "Helperlib/Log.hpp"
 #include <Carbon/Carbon.h>
 
 #include "keyboard.h"
@@ -61,11 +61,11 @@ void Mouse::update(){
 	
 	if(!conf->windowed){
 		
-    //		Point loc;
-    //		GetMouse(&loc);
+		Point loc;
+		GetMouse(&loc);
     //assert(false);
-    //		messageX=loc.h;
-    //		messageY=loc.v;
+		messageX=loc.h;
+		messageY=loc.v;
 		
 		
 		if(messageX>0 && messageY>0){
@@ -202,6 +202,19 @@ int luaMouseLoad(lua_State *L){
 		mouse.textureScale.y=im.height;
 
 		return 0;
+	}else{
+		int g=textureLibrary.load(file);
+
+		if(g!=-1){
+			mouse.textureId=g;
+
+			ImageData im=texture.info(g);
+
+			mouse.textureScale.x=im.width;
+			mouse.textureScale.y=im.height;
+
+			return 0;
+		}
 	}
 
 	console().write("Error loading file '"+file+"'");

@@ -5,15 +5,21 @@
 #include "camera.hpp"
 #include "light.h"
 #include "objects.hpp"
-#include "Containers.hpp"
+#include "particle.h"
+#include "Helperlib/Containers.hpp"
 #include "string.h"
 #include "panel.h"
 #include "null.h"
 #include "line.h"
 #include "line2d.hpp"
 #include "point.h"
+#include "particle2d.h"
 #include "textpanel.h"
+#include "thumbnails.h"
+#include "videopanel.h"
+#include "hair.h"
 #include "curve.hpp"
+#include "ikchain.hpp"
 #include "SphereObject.hpp"
 #include "disk.hpp"
 #include "circle.hpp"
@@ -101,11 +107,16 @@ class Level{
 		bool luaUpload(Light* o);
 		bool luaUpload(TextPanel* o);
 		bool luaUpload(Camera* o);
+		bool luaUpload(Thumbnails* o);
+		bool luaUpload(VideoPanel* o);
 		bool luaUpload(Hair* o);
 		bool luaUpload(Point3d* o);
 		bool luaUpload(Line3d* o);
 		bool luaUpload(Line2d* o);
 		bool luaUpload(NullObject* o);
+		bool luaUpload(IkRoot* o);
+		bool luaUpload(IkJoint* o);
+		bool luaUpload(IkEffector* o);
 		bool luaUpload(Curve* o);
 		bool luaUpload(Sphere* o);
 		bool luaUpload(Disk* o);
@@ -163,13 +174,20 @@ class Level{
 		Array<Object*> objects;	//all objects (meshes, not other types of objects)
 		Array<Light*> lights;	
 		Array<Camera*> cameras;
+		Array<Particle*> particles;
+		Array<Particle2d*> particles2d;
 		Array<Panel*> panels;
 		Array<Line3d*> lines;
 		Array<Line2d*> lines2d;
 		Array<Point3d*> points;
+		Array<Thumbnails*> thumbnails;
 		Array<TextPanel*> textpanels;
+		Array<VideoPanel*> videopanels;
 		Array<Hair*> hair;
 		Array<NullObject*> nulls;
+		Array<IkRoot*> ikRoots;
+		Array<IkJoint*> ikJoints;
+		Array<IkEffector*> ikEffectors;
 		Array<Curve*> curves;
 		Array<Sphere*> spheres;
 		Array<Disk*> disks;
@@ -182,15 +200,22 @@ class Level{
 		Map<String,Object*> objectKey;
 		Map<String,Light*> lightKey;
 		Map<String,Camera*> cameraKey;
+		Map<String,Particle*> particleKey;
+		Map<String,Particle2d*> particle2dKey;
 		Map<String,Panel*> panelKey;
 		Map<String,Line3d*> lineKey;
 		Map<String,Line2d*> line2dKey;
 		Map<String,Point3d*> pointKey;
 		Map<String,TextPanel*> textpanelKey;
+		Map<String,Thumbnails*> thumbnailsKey;
+		Map<String,VideoPanel*> videopanelKey;
 		Map<String,Hair*> hairKey;
 		Map<String,NullObject*> nullKey;
 		Map<String,Material*> materialKey;
 		Map<String,int> materialIndexKey;
+		Map<String,IkRoot*> ikRootKey;
+		Map<String,IkJoint*> ikJointKey;
+		Map<String,IkEffector*> ikEffectorKey;
 		Map<String,Curve*> curveKey;
 		Map<String,Sphere*> sphereKey;
 		Map<String,Disk*> diskKey;

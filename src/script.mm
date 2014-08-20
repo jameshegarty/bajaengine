@@ -9,8 +9,8 @@
 #endif
 
 #include "conf.h"
-#include "Log.hpp"
-#include "HelperLibMath.hpp"
+#include "Helperlib/Log.hpp"
+#include "Helperlib/HelperLibMath.hpp"
 #include "Text.hpp"
 #include "keyboard.h"
 #include "os.h"
@@ -19,6 +19,7 @@
 #include "shader.hpp"
 #include "script_upload.h"
 #include "level.hpp"
+#include "rsa.h"
 #include "Text.hpp"
 
 extern "C" { 

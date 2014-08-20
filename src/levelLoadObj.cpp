@@ -1,6 +1,7 @@
 #include "level.hpp"
 #include "script.hpp"
 #include <fstream>
+#include "editor.h"
 
 void createObjDefaultObj(ObjectAddress* obj){
 

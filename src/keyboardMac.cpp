@@ -4,7 +4,7 @@
 
 #include "mouse.h"
 #include "script.hpp"
-#include "Log.hpp"
+#include "Helperlib/Log.hpp"
 
 #include "Carbon/Carbon.h"
 

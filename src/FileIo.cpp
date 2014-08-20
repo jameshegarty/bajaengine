@@ -1,8 +1,9 @@
 #include "FileIo.hpp"
 #include "Bmp.hpp"
 #include "Tga.hpp"
+#include "jpg.hpp"
 #include "script.hpp"
-#include "HelperLibMath.hpp"
+#include "Helperlib/HelperLibMath.hpp"
 #include "leaks.h"
 #include "level.hpp"
 
@@ -346,6 +347,10 @@ ImageData loadImage(Path file, String name){
 		t=bmp.load(file);
 	}else if(file.getExtension()=="tga"){
 		t=tga.load(file);
+	}else if(file.getExtension()=="jpg"){
+		t=jpg.load(file);
+	}else if(file.getExtension()=="jpeg"){
+		t=jpg.load(file);
 	}else{
 		ImageData t;
 		t.loadSuccess=false;

@@ -8,7 +8,7 @@
  */
 
 #include "NeHeGlMac.h"
-#include "Log.hpp"
+#include "Helperlib/Log.hpp"
 
 #include "mouse.h"
 
@@ -21,7 +21,11 @@ extern "C"{
 #include "conf.h"
 #include "level.hpp"
 #include "os.h"
+#include "rsa.h"
+#include "engine_security.h"
+#include "md5.h"
 #include "keyboard.h"
+#include "editor.h"
 
 int nativeY;
 #define MAC_HIDE_MOUSE 1

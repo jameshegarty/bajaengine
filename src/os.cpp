@@ -1,7 +1,7 @@
 #include "os.h"
 
 
-#include "Log.hpp"
+#include "Helperlib/Log.hpp"
 
 #ifndef XSICONVERT
 #include "script.hpp"

@@ -1,7 +1,7 @@
 #ifndef MATH_H
 #define MATH_H
 
-#include "Types.hpp"
+#include "../Types.hpp"
 
 #ifdef _WIN32
 	#include <math.h>	//std math

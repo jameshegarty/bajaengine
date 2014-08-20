@@ -3,10 +3,11 @@
 #include <iostream>
 #include <fstream>
 
-#include "HelperLibMath.hpp"
+#include "Helperlib/HelperLibMath.hpp"
 #include "conf.h"
 #include "SceneGraph.hpp"
 #include "texture.hpp"
+#include "textureLibrary.h"
 #include "Filters.h"
 
 #ifndef XSICONVERT
@@ -21,7 +22,7 @@
 		#include <GLUT/glut.h>
 	#endif
 	
-	#include "Log.hpp"
+	#include "Helperlib/Log.hpp"
 	#include "os.h"
 
 	
@@ -377,6 +378,10 @@ unsigned long Object::size(){
 
 	size+=sizeof(unsigned int);	//animations.size()
 
+	for(int i=0; i<animations.size(); i++){
+		size+=animations[i].size();
+	}
+
 	size+=sizeof(unsigned int);	//envelopes.size()
 
 	if(type==0 || type==3){
@@ -384,6 +389,9 @@ unsigned long Object::size(){
 		size+=4*3*3;
 	}
 
+	for(int i=0; i<envelopes.size(); i++){
+		size+=envelopes[i].size();
+	}
 
 	return size;
 }
@@ -493,12 +501,16 @@ bool Object::write(std::ofstream& out){
 	}
 
 	//then animation
-	unsigned int anisize=0;
+	unsigned int anisize=animations.size();
 	out.write((char*)&anisize,sizeof(anisize));
 
+	for(unsigned int i=0; i<animations.size(); i++){
+
+		animations[i].write(out);
+	}
 
 	//then envelopes
-	unsigned int envsize=0;
+	unsigned int envsize=envelopes.size();
 	out.write((char*)&envsize,sizeof(envsize));
 
 	if(type==0 || type==3){
@@ -519,6 +531,9 @@ bool Object::write(std::ofstream& out){
 		out.write((char*)&baseScale.z,4);
 	}
 
+	for(unsigned int i=0; i<envelopes.size(); i++){
+		envelopes[i].write(out);
+	}
 
 	return true;
 }
@@ -1058,6 +1073,21 @@ bool Material::addTexture(String type, Path file){
 	}else{
 		int id=texture.load(file);
 
+		if(id==-1){
+			id=textureLibrary.load(file);
+
+			if(id==-1){
+				console().write("Material::addTexture error, file '"+file.getRelative()+"' not found!");
+
+
+				logs().renderer.write("Material::addTexture error, file '"+file.getRelative()+"' not found!");
+
+				level->textureCount--;
+
+				return false;
+			}
+		}
+	
 		ImageData imd=texture.info(id);
 
 		t.bytesPP=imd.bytesPP;

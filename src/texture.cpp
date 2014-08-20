@@ -2,6 +2,7 @@
 
 #include "Bmp.hpp"
 #include "Tga.hpp"
+#include "jpg.hpp"
 
 #ifdef _WIN32
 #include <windows.h>	// Header File For Windows
@@ -9,7 +10,7 @@
 
 #include "GlHeader.hpp"
 
-#include "Log.hpp"
+#include "Helperlib/Log.hpp"
 
 #include "Gl/Extensions.h"
 
@@ -412,6 +413,8 @@ int Texture::load(Path file){
 		image=bmp.load(file);
 	}else if(file.getExtension()=="tga"){
 		image=tga.load(file);
+	}else if(file.getExtension()==".jpg"){
+		image=jpg.load(file);
 	}else{
 		image.error="unknown file type '"+file.getFilename().substr(file.getFilename().size()-4,file.getFilename().size()-1)+"'";
 		
@@ -495,6 +498,8 @@ ImageData Texture::loadHeader(Path file){
 		image=bmp.loadHeader(file);
 	}else if(file.getExtension()=="tga"){
 		image=tga.loadHeader(file);
+	}else if(file.getExtension()=="jpg"){
+		image=jpg.loadHeader(file);
 	}else{
 		image.error="unknown file type '"+file.getExtension()+"'";
 		image.loadSuccess=false;
@@ -521,6 +526,8 @@ int Texture::loadNoMip(Path file){
 	}else if(file.getExtension()=="tga"){
 		
 		image=tga.load(file);
+	}else if(file.getExtension()=="jpg"){
+		image=jpg.load(file);
 	}else{
 		image.error="unknown file type '"+file.getExtension()+"'";
 		

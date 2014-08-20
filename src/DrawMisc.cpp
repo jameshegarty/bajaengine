@@ -1,6 +1,7 @@
 #include "GlHeader.hpp"
 										
 #include "draw.hpp"
+#include "DrawDynamic.h"
 #include "level.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -11,9 +12,9 @@
 #include "SceneGraph.hpp"
 #include "conf.h"
 
-#include "Log.hpp"
-#include "sort.hpp"
-#include "HelperLibMath.hpp"
+#include "Helperlib/Log.hpp"
+#include "Helperlib/sort.hpp"
+#include "Helperlib/HelperLibMath.hpp"
 
 #include "lightmap.h"
 
@@ -66,6 +67,18 @@ void drawNormals(){
 }
 
 void drawImplicitCallback(ObjectAddress obj){
+	if(obj.type==IK_ROOT){
+		obj.ikRoot->draw();
+	}
+
+	if(obj.type==IK_JOINT){
+		obj.ikJoint->draw();
+	}
+
+	if(obj.type==IK_EFFECTOR){
+		obj.ikEffector->draw();
+	}
+
 	if(obj.type==NULL3D){
 		obj.null->drawRaw();
 	}

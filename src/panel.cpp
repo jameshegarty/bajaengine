@@ -16,9 +16,9 @@
 #include "timeing.hpp"
 
 #include "os.h"
-#include "HelperLibMath.hpp"
+#include "Helperlib/HelperLibMath.hpp"
 
-#include "Log.hpp"
+#include "Helperlib/Log.hpp"
 
 Map<Path,int> dupTex;
 Map<Path,int> panelTexRefs;
@@ -385,6 +385,23 @@ bool Panel::load(Path file,int type=0){
 
 				assigned=true;
 				return true;
+			}else{
+				ImageData im=textureLibrary.loadHeader(file);
+	
+				if(im.loadSuccess){
+					
+					scale.x=im.width;
+					scale.y=im.height;
+
+					texsize.x=im.width;
+					texsize.y=im.height;
+
+					assigned=true;
+					return true;
+				}else{
+					console().write("Error 1 loading file '"+file.getRelative()+"', "+im.error);
+					return false;
+				}
 			}
 
 			return false;
@@ -402,6 +419,23 @@ bool Panel::load(Path file,int type=0){
 
 				assignedMouseover=true;
 				return true;
+			}else{
+				ImageData im=textureLibrary.loadHeader(file);
+
+				if(im.loadSuccess){
+					
+					scale.x=im.width;
+					scale.y=im.height;
+
+					texsize.x=im.width;
+					texsize.y=im.height;
+
+					assignedMouseover=true;
+					return true;
+				}else{
+					console().write("Error 3 loading file '"+file.getRelative()+"', "+im.error);
+					return false;
+				}
 			}
 
 			return false;
@@ -510,7 +544,19 @@ void Panel::draw(){
 				
 				int g=texture.loadNoMip(filename);
 				
-				if(g!=-1){
+				if(g==-1){
+
+					int gg=textureLibrary.loadNoMip(filename);
+
+					ImageData im=texture.info(gg);
+
+					textureId=gg;
+					dupTex[filename]=gg;
+					panelTexRefs[filename]=1;
+
+
+					loaded=true;
+				}else{
 					ImageData im=texture.info(g);
 
 					textureId=g;
@@ -533,7 +579,17 @@ void Panel::draw(){
 
 				int g=texture.loadNoMip(filenameMouseover);
 				
-				if(g!=-1){
+				if(g==-1){
+
+					int gg=textureLibrary.loadNoMip(filenameMouseover);
+
+					ImageData im=texture.info(gg);
+
+					textureIdMouseover=gg;
+					dupTex[filename]=gg;
+					panelTexRefs[filename]=1;
+					loadedMouseover=true;
+				}else{
 					ImageData im=texture.info(g);
 
 					textureIdMouseover=g;

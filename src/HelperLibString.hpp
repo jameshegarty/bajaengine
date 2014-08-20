@@ -5,7 +5,7 @@
 #include <string>
 #include <sstream>
 
-#include "Containers.hpp"
+#include "Helperlib/Containers.hpp"
 #include "Types.hpp"
 
 class String{
@@ -53,7 +53,7 @@ class String{
 
 			const wchar_t *tempsour = sr;
 			char *tempdest = t;
-			while( (*tempdest++=*tempsour++) );
+			while(*tempdest++=*tempsour++);
 			
 			s=t;
 		}
@@ -177,7 +177,7 @@ class String{
 
 			const char *tempsour = s.c_str();
 			wchar_t *tempdest = r;
-			while( (*tempdest++=*tempsour++) );
+			while(*tempdest++=*tempsour++);
 
 			return r;
 		}
@@ -189,7 +189,7 @@ class String{
 
 			const char *tempsour = s.c_str();
 			unsigned char *tempdest = r;
-			while( (*tempdest++=*tempsour++) );
+			while(*tempdest++=*tempsour++);
 
 			return r;
 		}
@@ -202,7 +202,7 @@ class String{
 			const char *tempsour = s.c_str();
 			r[0]=s.size();
 			unsigned char *tempdest = r+1;
-			while( (*tempdest++=*tempsour++) );
+			while(*tempdest++=*tempsour++);
 
 			return r;
 		}

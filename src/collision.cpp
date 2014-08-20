@@ -8,7 +8,7 @@
 //-----------------------------------------------------------------------------
 
 #include "vectormath.hpp"
-#include "objects.hpp"
+#include "../objects.hpp"
 #include "collision.hpp"
 // ----------------------------------------------------------------------------
 // Descr : Structure keeping track of the collisions as we find them. 

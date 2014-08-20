@@ -1,4 +1,4 @@
-#include "GlHeader.hpp"
+#include "../GlHeader.hpp"
 
 #include <math.h>			// Math Library Header File
 #include <stdio.h>			// Header File For Standard Input/Output

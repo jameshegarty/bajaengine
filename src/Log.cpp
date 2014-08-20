@@ -1,7 +1,7 @@
 #include "Log.hpp"
 
 #ifndef XSICONVERT
-	#include "os.h"
+	#include "../os.h"
 #endif
 
 #include <fstream>

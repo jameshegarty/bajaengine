@@ -4,10 +4,10 @@
 #include <OpenGL/glu.h>
 #include <OpenGL/glext.h>
 #include <OpenGL/OpenGL.h>
-#include "Engine.h"
+#include "../Engine.h"
 #include <sys/stat.h>
 
-#include "log.hpp"
+#include "../helperlib/log.hpp"
 #include "HelperLibString.hpp"
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreFoundation/CFDictionary.h>
@@ -66,7 +66,7 @@ bool MacSystem::error(std::string error){
 	
 	
 	
-//	OSErr err=StandardAlert(kAlertStopAlert,e.pascalStr (),NULL,NULL,&out);
+	OSErr err=StandardAlert(kAlertStopAlert,e.pascalStr (),NULL,NULL,&out);
 	
 	/*
 	 //	OSErr err=StandardAlert(kAlertStopAlert,e.pascalStr (),NULL,NULL,&out);

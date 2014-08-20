@@ -5,8 +5,8 @@
 
 #include "GlHeader.hpp"
 
-#include "Log.hpp"
-#include "HelperLibMath.hpp"
+#include "Helperlib/Log.hpp"
+#include "Helperlib/HelperLibMath.hpp"
 
 #include "os.h"
 #include "FileIo.hpp"
@@ -16,6 +16,7 @@
 
 #include "conf.h"
 
+#include "foam.hpp"
 #include "draw.hpp"
 
 using namespace std;
@@ -1068,7 +1069,116 @@ bool Level::luaUpload(Curve* o){
 }
 
 
+bool Level::luaUpload(IkRoot* o){
 
+	LuaType* foo=script().add(o->name,luaObj);
+
+		script().add("visible",&o->visible,foo);
+
+		LuaType* foop=script().add("pos",foo);
+			script().add("x",&o->pos.x,foop);
+			script().add("y",&o->pos.y,foop);
+			script().add("z",&o->pos.z,foop);
+
+		LuaType* foor=script().add("rot",foo);
+			script().add("x",&o->rot.x,foor);
+			script().add("y",&o->rot.y,foor);
+			script().add("z",&o->rot.z,foor);
+
+		LuaType* foos=script().add("scale",foo);
+			script().add("x",&o->scale.x,foos);
+			script().add("y",&o->scale.y,foos);
+			script().add("z",&o->scale.z,foos);
+
+
+	script().syncFrom(NULL);
+	script().syncTo(NULL);
+
+	return true;
+}
+
+
+bool Level::luaUpload(IkJoint* o){
+
+	LuaType* foo=script().add(o->name,luaObj);
+
+		script().add("visible",&o->visible,foo);
+
+		LuaType* foop=script().add("pos",foo);
+			script().add("x",&o->pos.x,foop);
+			script().add("y",&o->pos.y,foop);
+			script().add("z",&o->pos.z,foop);
+
+		LuaType* foor=script().add("rot",foo);
+			script().add("x",&o->rot.x,foor);
+			script().add("y",&o->rot.y,foor);
+			script().add("z",&o->rot.z,foor);
+
+		LuaType* foos=script().add("scale",foo);
+			script().add("x",&o->scale.x,foos);
+			script().add("y",&o->scale.y,foos);
+			script().add("z",&o->scale.z,foos);
+
+
+	script().syncFrom(NULL);
+	script().syncTo(NULL);
+
+	return true;
+}
+
+bool Level::luaUpload(Hair* o){ 
+	LuaType* foo=script().add(o->name,luaObj);
+
+	script().add("visible",&o->visible,foo);
+	script().add("setObject",&luaHairSetObject,foo);
+	script().add("loadWindMap",&luaHairLoadWindMap,foo);
+	script().add("loadDensityMap",&luaHairLoadDensityMap,foo);
+	script().add("name",&o->name,foo);
+	script().add("curl",&o->curl,foo);
+	script().add("stiffness",&o->stiffness,foo);
+	script().add("number",&o->number,foo);
+	script().add("width",&o->width,foo);
+	script().add("length",&o->length,foo);
+
+	LuaType* fooci=script().add("windVelocity",foo);
+		script().add("x",&o->windVelocity.x,fooci);
+		script().add("y",&o->windVelocity.y,fooci);
+		script().add("z",&o->windVelocity.z,fooci);
+
+	LuaType* foociy=script().add("windPower",foo);
+		script().add("x",&o->windPower.x,foociy);
+		script().add("y",&o->windPower.y,foociy);
+		script().add("z",&o->windPower.z,foociy);
+
+	LuaType* fooc=script().add("colorBase",foo);
+		script().add("r",&o->colorBase.x,fooc);
+		script().add("g",&o->colorBase.y,fooc);
+		script().add("b",&o->colorBase.z,fooc);
+		script().add("a",&o->colorBase.w,fooc);
+
+	LuaType* foocr=script().add("colorBaseRandom",foo);
+		script().add("r",&o->colorBaseRandom.x,foocr);
+		script().add("g",&o->colorBaseRandom.y,foocr);
+		script().add("b",&o->colorBaseRandom.z,foocr);
+		script().add("a",&o->colorBaseRandom.w,foocr);
+
+	LuaType* fooct=script().add("colorTip",foo);
+		script().add("r",&o->colorTip.x,fooct);
+		script().add("g",&o->colorTip.y,fooct);
+		script().add("b",&o->colorTip.z,fooct);
+		script().add("a",&o->colorTip.w,fooct);
+
+	LuaType* fooctq=script().add("colorTipRandom",foo);
+		script().add("r",&o->colorTipRandom.x,fooctq);
+		script().add("g",&o->colorTipRandom.y,fooctq);
+		script().add("b",&o->colorTipRandom.z,fooctq);
+		script().add("a",&o->colorTipRandom.w,fooctq);
+
+	script().syncFrom(NULL);
+	script().syncTo(NULL);
+
+	return true;
+}
 
 
 bool Level::luaUpload(Line3d* o){
@@ -1306,6 +1416,87 @@ bool Level::luaUpload(Panel* o){
 	return true;
 }
 
+bool Level::luaUpload(VideoPanel* o){
+	
+	LuaType* foo=script().add(o->name,luaObj);
+	
+	script().add("load",&luaVideoPanelLoad,foo);
+	script().add("shader",&luaVideoPanelShader,foo);
+	script().add("shaderParameter",&luaVideoPanelShaderParameter,foo);
+	script().add("autoplay",&luaVideoPanelAutoplay,foo);
+	script().add("fps",&luaVideoPanelFps,foo);
+	script().add("frame",&luaVideoPanelFrame,foo);
+	
+	script().add("name",&o->name,foo);	
+	script().add("percent",&o->percent,foo);	
+	script().add("visible",&o->visible,foo);	
+	
+
+		LuaType* fooc=script().add("color",foo);
+			script().add("r",&o->color.x,fooc);
+			script().add("g",&o->color.y,fooc);
+			script().add("b",&o->color.z,fooc);
+			script().add("a",&o->color.w,fooc);
+
+		LuaType* foos=script().add("scale",foo);
+			script().add("x",&o->scale.x,foos);
+			script().add("y",&o->scale.y,foos);
+
+		LuaType* foop=script().add("pos",foo);
+			script().add("x",&o->pos.x,foop);
+			script().add("y",&o->pos.y,foop);
+			script().add("z",&o->pos.z,foop);
+
+		LuaType* foor=script().add("rot",foo);
+			script().add("z",&o->rot.z,foor);
+
+	script().syncFrom(NULL);
+	script().syncTo(NULL);
+
+	return true;
+}
+
+
+
+bool Level::luaUpload(Thumbnails* o){
+	
+	LuaType* foo=script().add(o->name,luaObj);
+	
+	script().add("storeVisibleSet",&luaThumbnailsStoreVisibleSet,foo);
+	script().add("restoreVisibleSet",&luaThumbnailsRestoreVisibleSet,foo);
+	script().add("clear",&luaThumbnailsClear,foo);
+	script().add("currentlyVisible",&luaThumbnailsCurrentlyVisible,foo);
+	script().add("getVisibleSet",&luaThumbnailsGetVisibleSet,foo);
+	script().add("isThumbVisible",&luaThumbnailsIsThumbVisible,foo);
+	script().add("add",&luaThumbnailsAdd,foo);
+	script().add("thumbnailSize",&o->thumbnailSize,foo);
+	script().add("name",&o->name,foo);
+	script().add("visible",&o->visible,foo);
+	script().add("picsPerRow",&o->picsPerRow,foo);
+	script().add("mouseover",&o->mouseover,foo);
+	script().add("mouseoverThumbnail",&o->mouseoverThumbnail,foo);
+	
+	script().add("thumbPos",&luaThumbnailsThumbPos,foo);
+	script().add("thumbScale",&luaThumbnailsThumbScale,foo);
+	script().add("rotate",&luaThumbnailsRotate,foo);
+	
+	LuaType* foos=script().add("scale",foo);
+		script().add("x",&o->scale.x,foos);
+		script().add("y",&o->scale.y,foos);
+	
+	LuaType* foop=script().add("pos",foo);
+		script().add("x",&o->pos.x,foop);
+		script().add("y",&o->pos.y,foop);
+		script().add("z",&o->pos.z,foop);
+	
+	LuaType* foor=script().add("rot",foo);
+		script().add("z",&o->rot.z,foor);
+
+	script().syncFrom(NULL);
+	script().syncTo(NULL);
+
+	return true;
+}
 
 
 bool Level::luaUpload(TextPanel* o){
@@ -1345,6 +1536,155 @@ bool Level::luaUpload(TextPanel* o){
 
 	return true;
 }
+
+bool Level::luaUpload(Particle* o){
+	LuaType* foo=script().add(o->name,luaObj);
+	script().add("life",&o->life,foo);
+	script().add("lifeRandom",&o->lifeRandom,foo);
+	script().add("number",&o->number,foo);
+	script().add("type",&o->type,foo);
+	script().add("name",&o->name,foo);
+	script().add("orient",&o->orient,foo);
+	script().add("ratio",&o->ratio,foo);
+	script().add("visible",&o->visible,foo);
+	script().add("load",&luaParticleLoad,foo);
+	
+	script().add("on",&o->on,foo);
+	
+	script().add("thickness",&o->thickness,foo);
+	
+	
+	LuaType* fooc=script().add("color",foo);
+		script().add("r",&o->color.x,fooc);
+		script().add("g",&o->color.y,fooc);
+		script().add("b",&o->color.z,fooc);
+		script().add("a",&o->color.w,fooc);
+
+	LuaType* foocr=script().add("colorRandom",foo);
+		script().add("r",&o->colorRandom.x,foocr);
+		script().add("g",&o->colorRandom.y,foocr);
+		script().add("b",&o->colorRandom.z,foocr);
+		script().add("a",&o->colorRandom.w,foocr);
+
+	LuaType* fooa=script().add("area",foo);
+		script().add("x",&o->area.x,fooa);
+		script().add("y",&o->area.y,fooa);
+		script().add("z",&o->area.z,fooa);
+
+	LuaType* foop=script().add("pos",foo);
+		script().add("x",&o->pos.x,foop);
+		script().add("y",&o->pos.y,foop);
+		script().add("z",&o->pos.z,foop);
+
+	LuaType* foor=script().add("velocity",foo);
+		script().add("x",&o->velocity.x,foor);
+		script().add("y",&o->velocity.y,foor);
+		script().add("z",&o->velocity.z,foor);
+
+	LuaType* foov=script().add("velocityRandom",foo);
+		script().add("x",&o->velocityRandom.x,foov);
+		script().add("y",&o->velocityRandom.y,foov);
+		script().add("z",&o->velocityRandom.z,foov);
+
+	LuaType* foos=script().add("scale",foo);
+		script().add("x",&o->scale.x,foos);
+		script().add("y",&o->scale.y,foos);
+		script().add("z",&o->scale.z,foos);
+
+	LuaType* foosb=script().add("scaleBias",foo);
+		script().add("x",&o->scaleBias.x,foosb);
+		script().add("y",&o->scaleBias.y,foosb);
+		script().add("z",&o->scaleBias.z,foosb);
+
+	LuaType* foosr=script().add("scaleRandom",foo);
+		script().add("x",&o->scaleRandom.x,foosr);
+		script().add("y",&o->scaleRandom.y,foosr);
+		script().add("z",&o->scaleRandom.z,foosr);
+
+	LuaType* foojf=script().add("velocityJitterFreq",foo);
+		script().add("x",&o->velocityJitterFreq.x,foojf);
+		script().add("y",&o->velocityJitterFreq.y,foojf);
+		script().add("z",&o->velocityJitterFreq.z,foojf);
+
+	LuaType* fooja=script().add("velocityJitterAmp",foo);
+		script().add("x",&o->velocityJitterAmp.x,fooja);
+		script().add("y",&o->velocityJitterAmp.y,fooja);
+		script().add("z",&o->velocityJitterAmp.z,fooja);
+
+	script().syncFrom(NULL);
+	script().syncTo(NULL);
+
+	return true;
+}
+
+
+bool Level::luaUpload(Particle2d* o){
+	LuaType* foo=script().add(o->name,luaObj);
+	script().add("life",&o->life,foo);
+	script().add("lifeRandom",&o->lifeRandom,foo);
+	script().add("load",&luaParticle2dLoad,foo);
+	script().add("number",&o->number,foo);
+	script().add("type",&o->type,foo);
+	script().add("name",&o->name,foo);
+	script().add("ratio",&o->ratio,foo);
+
+	script().add("on",&o->on,foo);
+
+	LuaType* fooc=script().add("color",foo);
+		script().add("r",&o->color.x,fooc);
+		script().add("g",&o->color.y,fooc);
+		script().add("b",&o->color.z,fooc);
+		script().add("a",&o->color.w,fooc);
+
+	LuaType* foocr=script().add("colorRandom",foo);
+		script().add("r",&o->colorRandom.x,foocr);
+		script().add("g",&o->colorRandom.y,foocr);
+		script().add("b",&o->colorRandom.z,foocr);
+		script().add("a",&o->colorRandom.w,foocr);
+
+	LuaType* fooa=script().add("area",foo);
+		script().add("x",&o->area.x,fooa);
+		script().add("y",&o->area.y,fooa);
+
+	LuaType* foop=script().add("pos",foo);
+		script().add("x",&o->pos.x,foop);
+		script().add("y",&o->pos.y,foop);
+
+	LuaType* foor=script().add("velocity",foo);
+		script().add("x",&o->velocity.x,foor);
+		script().add("y",&o->velocity.y,foor);
+
+	LuaType* foov=script().add("velocityRandom",foo);
+		script().add("x",&o->velocityRandom.x,foov);
+		script().add("y",&o->velocityRandom.y,foov);
+
+	LuaType* foos=script().add("scale",foo);
+		script().add("x",&o->scale.x,foos);
+		script().add("y",&o->scale.y,foos);
+
+	LuaType* foosb=script().add("scaleBias",foo);
+		script().add("x",&o->scaleBias.x,foosb);
+		script().add("y",&o->scaleBias.y,foosb);
+
+
+	LuaType* foosr=script().add("scaleRandom",foo);
+		script().add("x",&o->scaleRandom.x,foosr);
+		script().add("y",&o->scaleRandom.y,foosr);
+
+	LuaType* foojf=script().add("velocityJitterFreq",foo);
+		script().add("x",&o->velocityJitterFreq.x,foojf);
+		script().add("y",&o->velocityJitterFreq.y,foojf);
+
+	LuaType* fooja=script().add("velocityJitterAmp",foo);
+		script().add("x",&o->velocityJitterAmp.x,fooja);
+		script().add("y",&o->velocityJitterAmp.y,fooja);
+
+	script().syncFrom(NULL);
+	script().syncTo(NULL);
+
+	return true;
+}
+
 
 
 int luaLoad(lua_State *L){

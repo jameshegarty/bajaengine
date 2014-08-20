@@ -1,5 +1,6 @@
 
 //memory leak 
+#include "BajaMidi.hpp"
 
 #include "GlHeader.hpp"
 
@@ -16,7 +17,7 @@
 #include "script.hpp"
 #include "Text.hpp"
 #include "engine.h"
-#include "Audio.hpp"
+#include "Audio/Audio.h"
 #include "shader.hpp"
 #include "glow.h"
 #include "physics.h"
@@ -24,9 +25,12 @@
 #include "hardware.hpp"
 #include "picking.h"
 #include "imagetools.h"
+#include "md5.h"
 #include "blur.h"
 #include "reflect.h"
-#include "Log.hpp"
+#include "editor.h"
+#include "Helperlib/Log.hpp"
+#include "textureLibrary.h"
 #include "Tga.hpp"
 #include "random.h"
 #include "lightmap.h"
@@ -124,6 +128,13 @@ bool scriptInit(){
 		logs().main.write("mouse init success");
 	}
 
+	if(!textureLibrary.scriptInit()){
+		os().error("textureLibrary script error: init error");
+			return false;
+	}else{
+		logs().main.write("textureLibrary init success");
+	}
+
 	if(!keyboard.scriptInit()){
 		os().error("keyboard script error: init error");
 			return false;
@@ -162,6 +173,13 @@ bool scriptInit(){
 	}
 
 	
+	if(!animation.scriptInit()){
+		os().error("animation script error: init error");
+			return false;
+	}else{
+		logs().main.write("animation init success");
+	}
+
 	if(!material.scriptInit()){
 		os().error("material script error: init error");
 			return false;
@@ -176,6 +194,12 @@ bool scriptInit(){
 		logs().main.write("LuaGl init success");
 	}
 
+	if(!bajaMidi.scriptInit()){
+		os().error("MIDI script error: init error");
+			return false;
+	}else{
+		logs().main.write("MIDI init success");
+	}
 
 	if(!osScriptInit()){
 		os().error("os script error: init error");
@@ -189,6 +213,12 @@ bool scriptInit(){
 		logs().main.write("image tools init success");
 	}
 
+	if(!md5ScriptInit()){
+		os().error("md5 script error: init error");
+			return false;
+	}else{
+		logs().main.write("md5 init success");
+	}
 
 	//needs to be last(so that it can access all the stuff above)
 	if(!conf->editor){
@@ -377,6 +407,123 @@ void annoyingTrialWatermark(){
 bool developerWatermarkInit=false;
 int developerWatermarkId=-1;
 
+void initDeveloperWatermark(){
+
+	//DO NOT use os().path here, because loadLibrary does it for us!
+	String developerlmtpath="developer.lmt";
+
+	if(os().fileExists("../tools/developer.lmt")){
+		developerlmtpath="../tools/developer.lmt";
+	}else if(os().fileExists("../../tools/developer.lmt")){
+		developerlmtpath="../../tools/developer.lmt";
+	}else{
+		if(!os().fileExists("developer.lmt")){
+			os().error("Error: developer.lmt not found!");
+		}
+	}
+
+	if(!textureLibrary.libraryLoaded(developerlmtpath)){
+		textureLibrary.loadLibrary(developerlmtpath);
+	}
+
+	Path dpath;
+	dpath.setRelative("developer.tga");
+
+	developerWatermarkId=textureLibrary.load(dpath);
+}
+
+void developerWatermark(){
+	if(!developerWatermarkInit){
+		initDeveloperWatermark();
+		developerWatermarkInit=true;
+	}
+
+	glViewport (0, 0, (GLsizei)(conf->sizeX), (GLsizei)(conf->sizeY));
+
+	glMatrixMode(GL_TEXTURE);
+		glLoadIdentity();
+
+	glMatrixMode (GL_PROJECTION);										// Select The Projection Matrix
+	glLoadIdentity ();
+
+	glOrtho(0,conf->sizeX,-conf->sizeY,0,-100,100);
+
+	glMatrixMode (GL_MODELVIEW);										// Select The Modelview Matrix
+
+	glLoadIdentity ();	
+	
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_DEPTH_TEST);
+
+	glDisable(GL_LIGHTING);
+
+	glDisable(GL_CULL_FACE);
+
+	glDisable(GL_TEXTURE_GEN_S);
+	glDisable(GL_TEXTURE_GEN_T);
+	glDisable(GL_TEXTURE_GEN_R);
+	glDisable(GL_TEXTURE_GEN_Q);
+
+	shader.reset();
+
+	glActiveTextureARB(GL_TEXTURE0_ARB);
+	glDisable(GL_TEXTURE_CUBE_MAP_ARB);
+	glDisable(GL_TEXTURE_2D);
+
+	glActiveTextureARB(GL_TEXTURE1_ARB);
+	glDisable(GL_TEXTURE_CUBE_MAP_ARB);
+	glDisable(GL_TEXTURE_2D);
+
+	glActiveTextureARB(GL_TEXTURE2_ARB);
+	glDisable(GL_TEXTURE_CUBE_MAP_ARB);
+	glDisable(GL_TEXTURE_2D);
+
+	glActiveTextureARB(GL_TEXTURE3_ARB);
+	glDisable(GL_TEXTURE_2D);
+
+	glActiveTextureARB(GL_TEXTURE4_ARB);
+	glDisable(GL_TEXTURE_2D);
+
+	glActiveTextureARB(GL_TEXTURE5_ARB);
+	glDisable(GL_TEXTURE_2D);
+
+	glActiveTextureARB(GL_TEXTURE0_ARB);
+
+	float amb[4];
+
+	amb[0]=1;
+	amb[1]=1;
+	amb[2]=1;
+	amb[3]=1;
+
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,amb);
+
+	glDisable (GL_FOG);
+
+
+	glColor4f(1,1,1,0.5);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D,developerWatermarkId);
+
+
+	float sx=178;
+	float sy=25;
+	
+	float px=conf->sizeX-sx-5;
+	float py=-5;
+	float pz=0;
+
+	glBegin(GL_QUADS);
+		glTexCoord2d(0,0); glVertex3f(px		,py,pz);
+		glTexCoord2d(1,0); glVertex3f(px+sx	,py,pz);
+		glTexCoord2d(1,-1); glVertex3f(px+sx	,py-sy,pz);
+		glTexCoord2d(0,-1); glVertex3f(px		,py-sy,pz);
+	glEnd();
+}
 
 #ifdef _WIN32
 bool Initialize (GL_Window* window, Keys* keys){
@@ -447,6 +594,11 @@ bool Initialize(){
 		hardware.audio=true;
 	}
 
+	if(!bajaMidi.init()){
+		logs().audio.write("MIDI error: init error");
+	}else{
+		logs().main.write("MIDI init success");
+	}
 
 	if(!physics.init()){
 		os().error("physics error: init error");
@@ -548,6 +700,7 @@ void update(){		// Perform Motion Updates Here
 	audio.perFrame();
 	engineTime.endTimer("audio");
 
+	bajaMidi.perFrame();
 
 	updateTextureLevel();
 
@@ -578,6 +731,7 @@ void update(){		// Perform Motion Updates Here
 		level->update();
 
 		
+		animation.perframe();
 		physics.perframe();
 	}else if(!conf->pause && (!currentlyLoading) ){
 		engineTime.startTimer("script");

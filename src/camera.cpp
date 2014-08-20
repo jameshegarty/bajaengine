@@ -12,7 +12,7 @@
 #include "mouse.h"
 
 #include "timeing.hpp"
-#include "HelperLibMath.hpp"
+#include "Helperlib/HelperLibMath.hpp"
 
 #include "level.hpp"
 

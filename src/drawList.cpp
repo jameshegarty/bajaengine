@@ -1,6 +1,7 @@
 #include "GlHeader.hpp"
 										
 #include "draw.hpp"
+#include "DrawDynamic.h"
 #include "level.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -9,9 +10,9 @@
 #include "hardware.hpp"
 #include "random.h"
 
-#include "Log.hpp"
-#include "sort.hpp"
-#include "HelperLibMath.hpp"
+#include "Helperlib/Log.hpp"
+#include "Helperlib/sort.hpp"
+#include "Helperlib/HelperLibMath.hpp"
 
 #include "lightmap.h"
 #include "SceneGraph.hpp"
@@ -210,7 +211,9 @@ void drawNonstaticInner(Object* object){
 			#endif
 			);
 
-		if(!disp && !disp_spec && !spec){
+	bool envelope=object->envelopes.size()>0;
+
+		if(!disp && !disp_spec && !spec  && !envelope){
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
 
@@ -269,6 +272,232 @@ void drawNonstaticInner(Object* object){
 				}else{
 					shader.set(mixer_1_v);
 					shader.set(mixer_1_f);
+				}
+			}else if(envelope){
+				shader.set(envelopeVertexShader);
+		
+				glDisable(GL_FRAGMENT_PROGRAM_ARB);
+
+				int e=0;
+				int metaE=0;
+				int emax=object->envelopes.size();
+
+				if(object->envelopeVerticesCount>1){
+					emax=object->envelopeVerticesEnvelopes[object->drawCurrentEnvelope].size();
+				}
+
+				for(; metaE<emax; metaE++){
+				
+					if(object->envelopeVerticesCount>1){
+						e=object->envelopeVerticesEnvelopes[object->drawCurrentEnvelope][metaE];
+					}else{
+						e=metaE;
+					}
+
+					Matrix4d4d m;
+
+					m.loadIdentity();
+
+					IkRoot* r;
+
+					if(object->envelopes[e].deformer->type==IK_JOINT){
+						
+						IkJoint* j=object->envelopes[e].deformer->ikJoint;
+
+						r=j->root;
+
+
+						FloatVector3d globalRot=level->sceneGraph.globalRot(r->sceneGraphNode->object);
+						FloatVector3d globalPos=level->sceneGraph.globalPos(r->sceneGraphNode->object);
+
+						m.translate(globalPos.x,globalPos.y,globalPos.z);
+
+						m.rotateZ(globalRot.z);
+						m.rotateY(globalRot.y);
+						m.rotateX(globalRot.x);
+
+						m.scale(r->scale.x,
+								r->scale.y,
+								r->scale.z);
+						
+
+					
+
+						FloatVector3d totalPos;		//place where we want the center to end up, relative to the root global
+						FloatVector3d centerPos;	//vector to the place where we'll rotate the obj.  relative to the root global
+
+						Matrix4d4d mp;
+						Matrix4d4d rm;
+						Matrix4d4d baseRot;
+						rm.loadIdentity();
+						mp.loadIdentity();
+						baseRot.loadIdentity();
+
+						int tj=0;
+
+						for(; r->joints[tj]!=j; tj++);
+
+						
+						
+						for(int rp=0; rp<=tj; rp++){
+							int po=rp;
+
+							rm.rotateZ(r->joints[po]->rot.z);
+							rm.rotateY(r->joints[po]->rot.y);
+							rm.rotateX(r->joints[po]->rot.x);
+
+						}
+
+						for(int rp=tj; rp>=0; rp--){
+							int po=rp;
+							
+
+							FloatVector3d rrot=r->joints[po]->rot;
+							FloatVector3d pref=r->joints[po]->preferedRot;
+							FloatVector3d lrot=r->joints[po]->localBaseRot;
+
+							rm.rotateX(-r->joints[po]->localBaseRot.x);
+							rm.rotateY(-r->joints[po]->localBaseRot.y);
+							rm.rotateZ(-r->joints[po]->localBaseRot.z);
+						}
+
+
+						for(int rp=0; rp<tj; rp++){
+
+							mp.rotateZ(r->joints[rp]->rot.z);
+							mp.rotateY(r->joints[rp]->rot.y);
+							mp.rotateX(r->joints[rp]->rot.x);
+
+							FloatVector4d lol=mp*FloatVector4d(1,0,0,0);
+
+							totalPos.x+=lol.x*r->joints[rp]->length;
+							totalPos.y+=lol.y*r->joints[rp]->length;
+							totalPos.z+=lol.z*r->joints[rp]->length;
+
+							baseRot.loadIdentity();	//it's global so we don't need to keep track of previous transformszzzz
+							
+							baseRot.rotateX(-r->baseRot.x);
+							baseRot.rotateY(-r->baseRot.y);
+							baseRot.rotateZ(-r->baseRot.z);
+							
+							
+							baseRot.rotateZ(r->joints[rp]->baseRot.z);
+							baseRot.rotateY(r->joints[rp]->baseRot.y);
+							baseRot.rotateX(r->joints[rp]->baseRot.x);
+							
+							FloatVector4d loll=baseRot*FloatVector4d(1,0,0,0);
+
+							centerPos.x+=loll.x*r->joints[rp]->length;
+							centerPos.y+=loll.y*r->joints[rp]->length;
+							centerPos.z+=loll.z*r->joints[rp]->length;
+						}
+
+
+						m.translate(totalPos.x,totalPos.y,totalPos.z);
+					
+						m=m*rm;
+		
+
+
+						m.translate(-centerPos.x,-centerPos.y,-centerPos.z);
+
+						m.scale( r->baseScale.x,
+								 r->baseScale.y,
+								 r->baseScale.z);
+						m.rotateX( - r->baseRot.x);
+						m.rotateY( - r->baseRot.y);
+						m.rotateZ( - r->baseRot.z);
+						m.translate(-r->basePos.x,-r->basePos.y,-r->basePos.z);
+
+						m.translate(object->basePos.x,object->basePos.y,object->basePos.z);
+
+						m.rotateZ(object->baseRot.z);
+						m.rotateY(object->baseRot.y);
+						m.rotateX(object->baseRot.x);
+						m.scale(object->baseScale.x,object->baseScale.y,object->baseScale.z);
+
+					}else if(object->envelopes[e].deformer->type==NULL3D){
+
+						NullObject* r=object->envelopes[e].deformer->null;
+
+
+						String nam=r->name;
+
+						Matrix4d4d t=level->sceneGraph.getMatrix(&level->sceneGraph.root,r->sceneGraphNode->parent);
+						m=t;
+
+						
+						m.translate(r->pos.x,r->pos.y,r->pos.z);
+		
+
+						m.rotateZ(r->rot.z);
+						m.rotateY(r->rot.y);
+						m.rotateX(r->rot.x);
+
+						m.scale(r->scale.x,
+								r->scale.y,
+								r->scale.z);
+
+						m.scale( r->baseScale.x,
+								 r->baseScale.y,
+								 r->baseScale.z);
+
+						m.rotateX( - r->baseRot.x);
+						m.rotateY( - r->baseRot.y);
+						m.rotateZ( - r->baseRot.z);
+
+						m.translate(-r->basePos.x,-r->basePos.y,-r->basePos.z);
+
+						m.translate(object->basePos.x,object->basePos.y,object->basePos.z);
+						m.rotateZ(object->baseRot.z);
+						m.rotateY(object->baseRot.y);
+						m.rotateX(object->baseRot.x);
+						m.scale(object->baseScale.x,object->baseScale.y,object->baseScale.z);
+					}else if(object->envelopes[e].deformer->type==OBJECT){
+
+						Object* r=object->envelopes[e].deformer->object;
+
+						Matrix4d4d t=level->sceneGraph.getMatrix(&level->sceneGraph.root,r->sceneGraphNode->parent);
+						m=t;
+
+
+						m.translate(r->pos.x,r->pos.y,r->pos.z);
+		
+
+						m.rotateZ(r->rot.z);
+						m.rotateY(r->rot.y);
+						m.rotateX(r->rot.x);
+
+						m.scale(r->scale.x,
+								r->scale.y,
+								r->scale.z);
+
+						m.scale( r->baseScale.x,
+								 r->baseScale.y,
+								 r->baseScale.z);
+
+						m.rotateX( - r->baseRot.x);
+						m.rotateY( - r->baseRot.y);
+						m.rotateZ( - r->baseRot.z);
+
+						m.translate(-r->basePos.x,-r->basePos.y,-r->basePos.z);
+
+						m.translate(object->basePos.x,object->basePos.y,object->basePos.z);
+						m.rotateZ(object->baseRot.z);
+						m.rotateY(object->baseRot.y);
+						m.rotateX(object->baseRot.x);
+						m.scale(object->baseScale.x,object->baseScale.y,object->baseScale.z);
+
+					}else{
+
+					}
+
+					shader.localParameterVertex(7+metaE*4,m.column(0));
+					shader.localParameterVertex(8+metaE*4,m.column(1));
+					shader.localParameterVertex(9+metaE*4,m.column(2));
+					shader.localParameterVertex(10+metaE*4,m.column(3));
+
+
 				}
 			}
 
@@ -376,7 +605,7 @@ void drawNonstaticInner(Object* object){
 
 
 	#ifndef SOFTWARE_TRANSFORMS
-		if(!disp && !disp_spec && !spec){
+		if(!disp && !disp_spec && !spec && !envelope){
 			glMatrixMode(GL_MODELVIEW);
 			glPopMatrix();
 		}else{

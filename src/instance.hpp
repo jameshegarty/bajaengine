@@ -5,6 +5,7 @@
 #include "objects.hpp"
 #include "HelperLibString.hpp"
 #include "script.hpp"
+#include "animation.hpp"
 
 //class ObjectAddress;
 //#include "sceneGraph.hpp"

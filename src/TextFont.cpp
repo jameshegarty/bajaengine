@@ -1,5 +1,5 @@
 #include "Text.hpp"
-#include "Log.hpp"
+#include "Helperlib/Log.hpp"
 
 #include "conf.h"
 #include "Bmp.hpp"
@@ -10,6 +10,8 @@
 
 
 #include "os.h"
+
+#include "rsa.h"
 
 
 using namespace std;

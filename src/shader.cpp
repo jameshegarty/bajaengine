@@ -1,8 +1,9 @@
 #include "shader.hpp"
 #include "Gl/Extensions.h"
-#include "Log.hpp"
+#include "Helperlib/Log.hpp"
 #include "script.hpp"
 #include "hardware.hpp"
+#include "md5.h"
 
 Shader shader;
 
@@ -443,6 +444,22 @@ ShaderId Shader::addFragmentFile(Path filename, String md5h){
 		fread(shaders[id].fragmentSource,shaders[id].fragmentLength, 1, file);
 		fclose(file);
 		
+		if(md5h!=""){
+			char* hexd=new char[33];
+
+			MD5 md5;
+			md5.update((unsigned char*)shaders[id].fragmentSource,shaders[id].fragmentLength);
+			md5.finalize();
+			hexd=md5.hex_digest();
+
+			for(int i=0; i<32; i++){
+				if(hexd[i]!=md5h[i]){
+					logs().renderer.write("shader "+filename.getAbsolute()+" different from expected!");
+					break;
+				}
+			}
+		}
+
 		uploadShader(shaders[id]);
 	}else{
 		logs().renderer.write("fragment program doesn't exist");
@@ -558,6 +575,22 @@ ShaderId Shader::addVertexFile(Path filename, String md5h){
 		fread(shaders[id].vertexSource,shaders[id].vertexLength, 1, file);
 		fclose(file);
 		
+		if(md5h!=""){
+			char* hexd=new char[33];
+
+			MD5 md5;
+			md5.update((unsigned char*)shaders[id].vertexSource,shaders[id].vertexLength);
+			md5.finalize();
+			hexd=md5.hex_digest();
+
+			for(int i=0; i<32; i++){
+				if(hexd[i]!=md5h[i]){
+					logs().renderer.write("shader "+filename.getAbsolute()+" different from expected!");
+					break;
+				}
+			}
+		}
+
 		uploadShader(shaders[id]);
 
 	}else{
@@ -634,6 +667,22 @@ ShaderId Shader::addVertexFile(Path filename,ShaderId link, String md5h){
 		fread(shaders[link].vertexSource,shaders[link].vertexLength, 1, file);
 		fclose(file);
 		
+		if(md5h!=""){
+			char* hexd=new char[33];
+
+			MD5 md5;
+			md5.update((unsigned char*)shaders[link].vertexSource,shaders[link].vertexLength);
+			md5.finalize();
+			hexd=md5.hex_digest();
+
+			for(int i=0; i<32; i++){
+				if(hexd[i]!=md5h[i]){
+					logs().renderer.write("shader "+filename.getAbsolute()+" different from expected!");
+					break;
+				}
+			}
+		}
+
 		uploadShader(shaders[link]);
 	}else{
 		logs().renderer.write("vertex shader doesn't exist");

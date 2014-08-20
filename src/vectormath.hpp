@@ -10,7 +10,7 @@
 #define VECTOR_MATH_H
 //#include <d3d.h>
 #include <math.h>
-#include "Types.hpp"
+#include "../Types.hpp"
 
 #define PLANE_BACKSIDE 0x000001
 #define PLANE_FRONT    0x000010

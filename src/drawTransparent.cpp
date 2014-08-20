@@ -1,6 +1,7 @@
 #include "GlHeader.hpp"
 										
 #include "draw.hpp"
+#include "DrawDynamic.h"
 #include "level.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -9,9 +10,9 @@
 #include "hardware.hpp"
 #include "random.h"
 
-#include "Log.hpp"
-#include "sort.hpp"
-#include "HelperLibMath.hpp"
+#include "Helperlib/Log.hpp"
+#include "Helperlib/sort.hpp"
+#include "Helperlib/HelperLibMath.hpp"
 
 #include "lightmap.h"
 

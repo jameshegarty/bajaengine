@@ -8,7 +8,7 @@
 #define OS_H
 
 #include <string>
-#include "Containers.hpp"
+#include "Helperlib/Containers.hpp"
 #include "Types.hpp"
 #include "HelperLibString.hpp"
 
@@ -99,7 +99,7 @@ class Os{
 #elif LINUX
 	#include "LinuxOs.hpp"
 #else
-	#include "MacOs.h"
+	#include "mac/MacOs.h"
 #endif
 
 

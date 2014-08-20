@@ -5,6 +5,7 @@
 #include "GlHeader.hpp"
 										
 #include "draw.hpp"
+#include "DrawDynamic.h"
 #include "level.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -13,11 +14,12 @@
 #include "hardware.hpp"
 #include "random.h"
 
-#include "Log.hpp"
-#include "sort.hpp"
-#include "HelperLibMath.hpp"
+#include "Helperlib/Log.hpp"
+#include "Helperlib/sort.hpp"
+#include "Helperlib/HelperLibMath.hpp"
 
 #include "lightmap.h"
+#include "editor.h"
 #include "timeing.hpp"
 
 #ifdef _WIN32
@@ -348,6 +350,17 @@ void drawPanels(){
 		}
 	}
 
+	for(int i=0; i<level->thumbnails.size(); i++){
+		level->thumbnails[i]->draw();
+	}
+
+	for(int i=0; i<level->videopanels.size(); i++){
+		level->videopanels[i]->draw();
+	}
+
+	for(int i=0; i<level->particles2d.size(); i++){
+		level->particles2d[i]->draw();
+	}
 
 	for(int i=0; i<level->lines2d.size(); i++){
 		level->lines2d[i]->draw();

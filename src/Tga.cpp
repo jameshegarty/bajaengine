@@ -1,6 +1,6 @@
 #include "Tga.hpp"
-#include "HelperLibMath.hpp"
-#include "Log.hpp"
+#include "Helperlib/HelperLibMath.hpp"
+#include "Helperlib/Log.hpp"
 
 
 using namespace std;

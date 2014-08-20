@@ -6,8 +6,8 @@
 
 #include "GlHeader.hpp"
 
-#include "Log.hpp"
-#include "HelperLibMath.hpp"
+#include "Helperlib/Log.hpp"
+#include "Helperlib/HelperLibMath.hpp"
 
 #include "FileIo.hpp"
 #include "bmp.hpp"
@@ -17,6 +17,7 @@
 #include "filters.h"
 #include "conf.h"
 
+#include "foam.hpp"
 #include "draw.hpp"
 
 #include "os.h"

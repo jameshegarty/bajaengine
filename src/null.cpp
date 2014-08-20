@@ -61,6 +61,10 @@ void NullObject::update(){
 
 		if(constraintPos->type==NULL3D){
 			pos=constraintPos->null->pos;
+		}else if(constraintPos->type==IK_ROOT){
+			pos=constraintPos->ikRoot->pos;
+		}else if(constraintPos->type==IK_JOINT){
+			pos=constraintPos->ikJoint->pos;
 		}else{
 
 		}
@@ -69,6 +73,10 @@ void NullObject::update(){
 	if(constraintRot!=NULL){
 		if(constraintRot->type==NULL3D){
 			rot=constraintRot->null->rot;
+		}else if(constraintRot->type==IK_ROOT){
+			rot=constraintRot->ikRoot->rot;
+		}else if(constraintRot->type==IK_JOINT){
+			rot=constraintRot->ikJoint->rot;
 		}else{
 
 		}
@@ -77,7 +85,12 @@ void NullObject::update(){
 	if(constraintScale!=NULL){
 		if(constraintScale->type==NULL3D){
 			scale=constraintScale->null->scale;
+		}else if(constraintScale->type==IK_ROOT){
+			scale=constraintScale->ikRoot->scale;
+		}else if(constraintScale->type==IK_JOINT){
+			scale=constraintScale->ikJoint->scale;
 		}else{
+
 		}
 	}
 }

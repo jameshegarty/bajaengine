@@ -8,15 +8,17 @@
 #endif
 
 #include "GlHeader.hpp"
-#include "Log.hpp"
-#include "HelperLibMath.hpp"
+#include "Helperlib/Log.hpp"
+#include "Helperlib/HelperLibMath.hpp"
 #include "FileIo.hpp"
 #include "Bmp.hpp"
 #include "texture.hpp"
 #include "camera.hpp" 
 #include "SceneGraph.hpp"
 #include "conf.h"
+#include "foam.hpp"
 #include "draw.hpp"
+#include "editor.h"
 #include "os.h"
 #include "leaks.h"
 
@@ -365,6 +367,13 @@ bool Level::remove(String name){
 		delete light;
 		leaks.rem("Level::lights");
 
+	}else if(particleKey.find(name)){
+		
+		delete particleKey[name];
+		leaks.rem("Level::particles");
+
+		particles.erase(particles.dataRef(particleKey[name]));
+		
 	}else if(nullKey.find(name)){
 		
 		NullObject* null=nullKey[name];
@@ -443,7 +452,9 @@ ObjectAddress Level::add(String name,String type){
 		diskKey.find(name) ||
 		cameraKey.find(name) ||
 		panelKey.find(name) ||
-		instanceKey.find(name) ) && (type!="Material" && type!="material")
+		instanceKey.find(name) ||
+		thumbnailsKey.find(name) ||
+		particleKey.find(name) ) && (type!="Material" && type!="material")
 		){
 			console().write("add error: an object named '"+name+"' already exists!");
 
@@ -523,6 +534,39 @@ ObjectAddress Level::add(String name,String type){
 
 		return t;
 
+	}else if(type=="thumbnails" || type=="Thumbnails"){
+
+		Thumbnails* t=new Thumbnails;
+		t->name=name;
+		thumbnails.pushBack(t);
+		thumbnailsKey[name]=t;
+
+		luaUpload(t);
+		
+		
+
+		ObjectAddress a;
+		a.type=THUMBNAILS;
+		a.thumbnails=t;
+
+
+		return a;
+
+	}else if(type=="videopanel" || type=="VideoPanel"){
+
+		VideoPanel* t=new VideoPanel;
+		t->name=name;
+		videopanels.pushBack(t);
+		videopanelKey[name]=t;
+
+		luaUpload(t);
+
+		ObjectAddress a;
+		a.type=VIDEOPANEL;
+		a.videopanel=t;
+
+		return a;
+
 	}else if(type=="textpanel" || type=="TextPanel"){
 
 		TextPanel* t=new TextPanel;
@@ -580,6 +624,24 @@ ObjectAddress Level::add(String name,String type){
 
 
 		return t;
+
+	}else if(type=="hair" || type=="Hair"){
+
+		Hair* t=new Hair;
+		t->name=name;
+		hair.pushBack(t);
+		hairKey[name]=t;
+
+		luaUpload(t);
+		
+		
+
+		ObjectAddress a;
+		a.type=HAIR;
+		a.hair=t;
+
+	
+		return a;
 
 	}else if(type=="line" || type=="Line"){
 
@@ -769,6 +831,31 @@ ObjectAddress Level::add(String name,String type){
 
 		return a;
 
+	}else if(type=="particle" || type=="particles" || type=="Particle"){
+		Particle* p=new Particle;
+		p->name=name;
+		particles.pushBack(p);
+		particleKey[name]=p;
+		luaUpload(p);
+
+		ObjectAddress t;
+		t.type=PARTICLE;
+		t.particle=p;
+
+		return t;
+	}else if(type=="particle2d" || type=="particles2d" || type=="Particle2d"){
+		Particle2d* p=new Particle2d;
+		p->name=name;
+		particles2d.pushBack(p);
+		particle2dKey[name]=p;
+		luaUpload(p);
+
+		ObjectAddress t;
+		t.type=PARTICLE_2D;
+		t.particle2d=p;
+
+		
+		return t;
 	}else if(type=="null"){
 		NullObject* p=new NullObject;
 		p->name=name;
@@ -961,6 +1048,13 @@ void Level::update(){
 		transparentObjects[i]->update();
 	}
 
+	for(int i=0; i<ikEffectors.size(); i++){
+		ikEffectors[i]->update();
+	}
+
+	for(int i=0; i<ikRoots.size(); i++){
+		ikRoots[i]->update();
+	}
 
 	for(int i=0; i<nulls.size(); i++){
 		nulls[i]->update();
@@ -1109,6 +1203,18 @@ bool Level::objectExists(String name){
 		return true;
 	}
 
+	if(ikRootKey.find(name)){
+		return true;
+
+	}
+
+	if(ikJointKey.find(name)){
+		return true;
+	}
+
+	if(ikEffectorKey.find(name)){
+		return true;
+	}
 
 	return false;
 }

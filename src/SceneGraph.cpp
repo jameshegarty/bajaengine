@@ -1,8 +1,8 @@
 #include "SceneGraph.hpp"
-#include "HelperLibMath.hpp"
+#include "Helperlib/HelperLibMath.hpp"
 #include "level.hpp"
 #include "instance.hpp"
-#include "sort.hpp"
+#include "Helperlib/sort.hpp"
 
 SceneGraph sceneGraph;
 
@@ -18,13 +18,33 @@ void drawRecurse(void (*callbackFunction)(ObjectAddress), SceneGraphNode* node,b
 	FloatVector3d pos,rot,scale;
 
 	if(node->object.type==OBJECT){
-    pos=node->object.object->pos;
-    rot=node->object.object->rot;
-    scale=node->object.object->scale;
+
+		if(node->object.object->envelopes.size()>0){
+			pos=node->object.object->basePos;
+			rot=node->object.object->baseRot;
+			scale=node->object.object->baseScale;
+		}else{
+			pos=node->object.object->pos;
+			rot=node->object.object->rot;
+			scale=node->object.object->scale;
+		}
+
 	}else if(node->object.type==NULL3D){
 		pos=node->object.null->pos;
 		rot=node->object.null->rot;
 		scale=node->object.null->scale;
+	}else if(node->object.type==IK_ROOT){
+		pos=node->object.ikRoot->pos;
+		rot=node->object.ikRoot->rot;
+		scale=node->object.ikRoot->scale;
+	}else if(node->object.type==IK_JOINT){
+		pos=node->object.ikJoint->pos;
+		rot=node->object.ikJoint->rot;
+		scale=node->object.ikJoint->scale;
+	}else if(node->object.type==IK_EFFECTOR){
+		pos=FloatVector3d();
+		rot=FloatVector3d();
+		scale=FloatVector3d(1,1,1);
 	}else if(node->object.type==LIGHT){
 		pos=node->object.light->pos;
 		rot=node->object.light->rot;
@@ -36,7 +56,15 @@ void drawRecurse(void (*callbackFunction)(ObjectAddress), SceneGraphNode* node,b
 	if(node->draw && !preTransform){
 
 		if(node->object.type==OBJECT){
-      callbackFunction(node->object);
+			if(node->object.object->envelopeVerticesCount>1){
+			
+				for(int i=0; i<node->object.object->envelopeVerticesCount; i++){
+					node->object.object->drawCurrentEnvelope=i;
+					callbackFunction(node->object);
+				}
+			}else{
+				callbackFunction(node->object);
+			}
 		}else{
 			callbackFunction(node->object);
 		}
@@ -53,13 +81,54 @@ void drawRecurse(void (*callbackFunction)(ObjectAddress), SceneGraphNode* node,b
 	glRotatef(rot.x,1.0f,0.0f,0.0f);
 	glScalef(scale.x,scale.y,scale.z);
 
+	if(node->object.type==IK_EFFECTOR){
+		IkRoot* r=node->object.ikEffector->root;
+
+		if(r->sceneGraphNode!=node->parent){
+			//we only really care where the root is
+			//so if the root isn't our parent, we need to trace to the root
+			//argh
+
+
+			glMatrixMode(GL_MODELVIEW);
+			glPushMatrix();
+
+			glLoadIdentity();
+			level->camera->transform();
+			sceneGraph.modelviewTransform(&sceneGraph.root,r->sceneGraphNode);
+
+
+		}
+
+		for(int i=0; i<r->joints.size(); i++){
+
+			IkJoint* j=r->joints[i];
+
+			glRotatef(j->rot.z,0.0f,0.0f,1.0f);
+			glRotatef(j->rot.y,0.0f,1.0f,0.0f);
+			glRotatef(j->rot.x,1.0f,0.0f,0.0f);
+			glScalef(j->scale.x,j->scale.y,j->scale.z);
+
+			glTranslatef(j->length,0,0);
+			
+
+		}
+	}
 
 #endif
 
 	if(node->draw && preTransform){
 
 		if(node->object.type==OBJECT){
-      callbackFunction(node->object);
+			if(node->object.object->envelopeVerticesCount>1){
+			
+				for(int i=0; i<node->object.object->envelopeVerticesCount; i++){
+					node->object.object->drawCurrentEnvelope=i;
+					callbackFunction(node->object);
+				}
+			}else{
+				callbackFunction(node->object);
+			}
 		}else{
 			callbackFunction(node->object);
 		}
@@ -84,6 +153,13 @@ void drawRecurse(void (*callbackFunction)(ObjectAddress), SceneGraphNode* node,b
 		drawRecurse(callbackFunction,&node->children[res[i]],preTransform);
 	}
 	
+	if(node->object.type==IK_EFFECTOR){
+		IkRoot* r=node->object.ikEffector->root;
+
+		if(r->sceneGraphNode!=node->parent){
+			glPopMatrix();
+		}
+	}
 
 #ifndef SOFTWARE_TRANSFORMS
 	glPopMatrix(); 
@@ -106,6 +182,12 @@ FloatVector3d SceneGraph::global(ObjectAddress node,int t,FloatVector3d gpos){
 
 	if(node.type==OBJECT){
 		p=node.object->sceneGraphNode;
+	}else if(node.type==IK_JOINT){
+		p=node.ikJoint->sceneGraphNode;
+	}else if(node.type==IK_EFFECTOR){
+		p=node.ikEffector->sceneGraphNode;
+	}else if(node.type==IK_ROOT){
+		p=node.ikRoot->sceneGraphNode;
 	}else if(node.type==NULL3D){
 		p=node.null->sceneGraphNode;
 	}else if(node.type==CURVE){
@@ -152,13 +234,33 @@ FloatVector3d SceneGraph::global(ObjectAddress node,int t,FloatVector3d gpos){
 				scale=p->object.curve->scale;
 			}
 		}else if(p->object.type==OBJECT){
-      pos=p->object.object->pos;
-      rot=p->object.object->rot;
-      scale=p->object.object->scale;
+			if(p->object.object->envelopes.size()>0){
+				pos=p->object.object->basePos;
+				rot=p->object.object->baseRot;
+				scale=p->object.object->baseScale;
+			}else{
+				pos=p->object.object->pos;
+				rot=p->object.object->rot;
+				scale=p->object.object->scale;
+			}
+		}else if(p->object.type==IK_ROOT){
+			if( (t==4 || t==5 || t==6) && p->object.ikRoot->hasBasePose){
+				pos=p->object.ikRoot->basePos;
+				rot=p->object.ikRoot->baseRot;
+				scale=p->object.ikRoot->baseScale;
+			}else{
+				pos=p->object.ikRoot->pos;
+				rot=p->object.ikRoot->rot;
+				scale=p->object.ikRoot->scale;
+			}
 		}else if(p->object.type==CAMERA){
 			pos=p->object.camera->pos;
 			rot=p->object.camera->rot;
 			scale=p->object.camera->scale;
+		}else if(p->object.type==IK_EFFECTOR){
+			pos=FloatVector3d();
+			rot=FloatVector3d();
+			scale=FloatVector3d(1,1,1);
 		}else{
 		
 		}
@@ -169,6 +271,29 @@ FloatVector3d SceneGraph::global(ObjectAddress node,int t,FloatVector3d gpos){
 		m.rotateY(rot.y);
 		m.rotateX(rot.x);
 
+		if(p->object.type==IK_EFFECTOR){
+			IkRoot* r=p->object.ikEffector->root;
+
+
+			for(int i=0; i<r->joints.size(); i++){
+
+				IkJoint* j=r->joints[i];
+
+				if(t==4 || t==5 || t==6){
+					m.rotateZ(j->baseRot.z);
+					m.rotateY(j->baseRot.y);
+					m.rotateX(j->baseRot.x);
+					
+					m.translate(j->length,0,0);
+				}else{
+					m.rotateZ(j->rot.z);
+					m.rotateY(j->rot.y);
+					m.rotateX(j->rot.x);
+					
+					m.translate(j->length,0,0);
+				}
+			}
+		}
 	}
 
 	if(t==1){
@@ -193,6 +318,12 @@ FloatVector3d SceneGraph::local(ObjectAddress node,FloatVector3d v,int t){
 
 	if(node.type==OBJECT){
 		p=node.object->sceneGraphNode;
+	}else if(node.type==IK_JOINT){
+		p=node.ikJoint->sceneGraphNode;
+	}else if(node.type==IK_EFFECTOR){
+		p=node.ikEffector->sceneGraphNode;
+	}else if(node.type==IK_ROOT){
+		p=node.ikRoot->sceneGraphNode;
 	}else if(node.type==NULL3D){
 		p=node.null->sceneGraphNode;
 	}else if(node.type==CURVE){
@@ -224,13 +355,31 @@ FloatVector3d SceneGraph::local(ObjectAddress node,FloatVector3d v,int t){
 			rot=p->object.null->rot;
 			scale=p->object.null->scale;
 		}else if(p->object.type==OBJECT){
-      pos=p->object.object->pos;
-      rot=p->object.object->rot;
-      scale=p->object.object->scale;
+			if(p->object.object->envelopes.size()>0){
+				pos=p->object.object->basePos;
+				rot=p->object.object->baseRot;
+				scale=p->object.object->baseScale;
+			}else{
+				pos=p->object.object->pos;
+				rot=p->object.object->rot;
+				scale=p->object.object->scale;
+			}
+		}else if(p->object.type==IK_ROOT){
+			pos=p->object.ikRoot->pos;
+			rot=p->object.ikRoot->rot;
+			scale=p->object.ikRoot->scale;
 		}else if(p->object.type==CAMERA){
 			pos=p->object.camera->pos;
 			rot=p->object.camera->rot;
 			scale=p->object.camera->scale;
+		}else if(p->object.type==IK_EFFECTOR){
+			pos=FloatVector3d();
+			rot=FloatVector3d();
+			scale=FloatVector3d(1,1,1);
+		}else if(p->object.type==IK_JOINT){
+			pos=p->object.ikJoint->pos;
+			rot=p->object.ikJoint->rot;
+			scale=p->object.ikJoint->scale;
 		}else if(p->object.type==CURVE){
 			pos=p->object.curve->pos;
 			rot=p->object.curve->rot;
@@ -245,6 +394,24 @@ FloatVector3d SceneGraph::local(ObjectAddress node,FloatVector3d v,int t){
 		m.rotateZ(-rot.z);
 
 		m.translate(-pos.x,-pos.y,-pos.z);
+
+		if(p->object.type==IK_EFFECTOR){
+			IkRoot* r=p->object.ikEffector->root;
+
+			for(int i=r->joints.size()-1; i>=0; i--){
+
+				IkJoint* j=r->joints[i];
+
+				
+				m.translate(-j->length,0,0);
+				m.rotateX(-j->rot.x);
+				m.rotateY(-j->rot.y);
+				m.rotateZ(-j->rot.z);
+
+			}
+
+		}
+
 
 	}
 
@@ -367,13 +534,33 @@ void SceneGraph::modelviewTransform(SceneGraphNode* from, SceneGraphNode* to){
 		FloatVector3d pos,rot,scale;
 
 		if(node->object.type==OBJECT){
-      pos=node->object.object->pos;
-      rot=node->object.object->rot;
-      scale=node->object.object->scale;
+
+			if(node->object.object->envelopes.size()>0){
+				pos=node->object.object->basePos;
+				rot=node->object.object->baseRot;
+				scale=node->object.object->baseScale;
+			}else{
+				pos=node->object.object->pos;
+				rot=node->object.object->rot;
+				scale=node->object.object->scale;
+			}
+
 		}else if(node->object.type==NULL3D){
 			pos=node->object.null->pos;
 			rot=node->object.null->rot;
 			scale=node->object.null->scale;
+		}else if(node->object.type==IK_ROOT){
+			pos=node->object.ikRoot->pos;
+			rot=node->object.ikRoot->rot;
+			scale=node->object.ikRoot->scale;
+		}else if(node->object.type==IK_JOINT){
+			pos=node->object.ikJoint->pos;
+			rot=node->object.ikJoint->rot;
+			scale=node->object.ikJoint->scale;
+		}else if(node->object.type==IK_EFFECTOR){
+			pos=FloatVector3d();
+			rot=FloatVector3d();
+			scale=FloatVector3d(1,1,1);
 		}else if(node->object.type==LIGHT){
 			pos=node->object.light->pos;
 			rot=node->object.light->rot;
@@ -389,6 +576,27 @@ void SceneGraph::modelviewTransform(SceneGraphNode* from, SceneGraphNode* to){
 		glRotatef(rot.x,1,0,0);
 		glScalef(scale.x,scale.y,scale.z);
 	
+
+		if(node->object.type==IK_EFFECTOR){
+			IkRoot* r=node->object.ikEffector->root;
+
+			//if the effector's parent isn't the root
+			//we need to recurse here.  see the main draw function above.
+			// need to implement this sometime probably
+
+
+			for(int i=0; i<r->joints.size(); i++){
+				IkJoint* j=r->joints[i];
+
+				glRotatef(j->rot.z,0,0,1);
+				glRotatef(j->rot.y,0,1,0);
+				glRotatef(j->rot.x,1,0,0);
+				glScalef(j->scale.x,j->scale.y,j->scale.z);
+				glTranslatef(j->length,0,0);
+				
+			}
+
+		}
 
 	}
 
@@ -417,13 +625,33 @@ Matrix4d4d SceneGraph::getMatrixMain(SceneGraphNode* from, SceneGraphNode* to, b
 		FloatVector3d pos,rot,scale;
 
 		if(node->object.type==OBJECT){
-      pos=node->object.object->pos;
-      rot=node->object.object->rot;
-      scale=node->object.object->scale;
+
+			if(node->object.object->envelopes.size()>0){
+				pos=node->object.object->basePos;
+				rot=node->object.object->baseRot;
+				scale=node->object.object->baseScale;
+			}else{
+				pos=node->object.object->pos;
+				rot=node->object.object->rot;
+				scale=node->object.object->scale;
+			}
+
 		}else if(node->object.type==NULL3D){
 			pos=node->object.null->pos;
 			rot=node->object.null->rot;
 			scale=node->object.null->scale;
+		}else if(node->object.type==IK_ROOT){
+			pos=node->object.ikRoot->pos;
+			rot=node->object.ikRoot->rot;
+			scale=node->object.ikRoot->scale;
+		}else if(node->object.type==IK_JOINT){
+			pos=node->object.ikJoint->pos;
+			rot=node->object.ikJoint->rot;
+			scale=node->object.ikJoint->scale;
+		}else if(node->object.type==IK_EFFECTOR){
+			pos=FloatVector3d();
+			rot=FloatVector3d();
+			scale=FloatVector3d(1,1,1);
 		}else if(node->object.type==LIGHT){
 			pos=node->object.light->pos;
 			rot=node->object.light->rot;
@@ -446,6 +674,27 @@ Matrix4d4d SceneGraph::getMatrixMain(SceneGraphNode* from, SceneGraphNode* to, b
 			final.scale(scale.x,scale.y,scale.z);
 		}
 
+		if(node->object.type==IK_EFFECTOR){
+			IkRoot* r=node->object.ikEffector->root;
+
+			for(int i=0; i<r->joints.size(); i++){
+				IkJoint* j=r->joints[i];
+
+				if(reverse){
+					final.translate(-j->length,0,0);
+					final.rotateX(-j->rot.x);
+					final.rotateY(-j->rot.y);
+					final.rotateZ(-j->rot.z);
+				}else{
+					final.rotateZ(j->rot.z);
+					final.rotateY(j->rot.y);
+					final.rotateX(j->rot.x);
+					final.scale(j->scale.x,j->scale.y,j->scale.z);
+					final.translate(j->length,0,0);
+				}
+			}
+
+		}
 
 	}
 
@@ -468,6 +717,12 @@ bool SceneGraph::nonstatic(SceneGraphNode* node){
 
 	while(node!=&root){
 		if(node->object.type==NULL3D){
+			nonstatic=true;
+		}else if(node->object.type==IK_ROOT){
+			nonstatic=true;
+		}else if(node->object.type==IK_JOINT){
+			nonstatic=true;
+		}else if(node->object.type==IK_EFFECTOR){
 			nonstatic=true;
 		}else if(node->object.object->flags & OBJECT_STATIC){
 			nonstatic=true;

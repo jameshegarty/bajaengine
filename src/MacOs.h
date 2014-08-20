@@ -2,10 +2,10 @@
 #define MAC_OS_H
 
 #include <Carbon/Carbon.h>
-#include "Os.h"
+#include "../Os.h"
 
 #include <string>
-#include "Containers.hpp"
+#include "../HelperLib/Containers.hpp"
 #include <AGL/agl.h>
 
 extern Map<String,CFDictionaryRef> macModes;

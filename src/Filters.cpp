@@ -1,5 +1,5 @@
 #include "Filters.h"
-#include "HelperLibMath.hpp"
+#include "Helperlib/HelperLibMath.hpp"
 
 int gWidth, gHeight;
 

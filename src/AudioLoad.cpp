@@ -1,21 +1,20 @@
-#include "common.h"
-#include "engine.h"
-#include "HelperLibMath.hpp"
-#include "Log.hpp"
-#include "level.hpp"
-#include "Audio.hpp"
-#include "timeing.hpp"
-#include "hardware.hpp"
+#include "../common.h"
+#include "../engine.h"
+#include "../Helperlib/HelperLibMath.hpp"
+#include "../Helperlib/Log.hpp"
+#include "../level.hpp"
+#include "Audio.h"
+#include "../timeing.hpp"
+#include "../hardware.hpp"
 
 #include <al.h>
 #include <alc.h>
 
-#include <stdio.h>
-#include "script.hpp"
+#include "../script.hpp"
 
-#include "os.h"
+#include "../os.h"
 
-#include "GlHeader.hpp"
+#include "../GlHeader.hpp"
 
 #ifndef PADOFF_VAR
 	#define PADOFF_VAR
@@ -88,7 +87,7 @@ void alutLoadWAVFile(ALbyte *file,ALenum *format,ALvoid **data,ALsizei *size,ALs
 	*loop=AL_FALSE;
 	if (file)
 	{
-		Stream=fopen((const char*)file,"rb");
+		Stream=fopen(file,"rb");
 		if (Stream)
 		{
 			fread(&FileHdr,1,sizeof(WAVFileHdr_Struct),Stream);
@@ -170,7 +169,7 @@ float wavLen(ALbyte *file)
 	loop=AL_FALSE;
 	if (file)
 	{
-		Stream=fopen((const char*)file,"rb");
+		Stream=fopen(file,"rb");
 		if (Stream)
 		{
 			fread(&FileHdr,1,sizeof(WAVFileHdr_Struct),Stream);

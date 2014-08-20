@@ -6,8 +6,8 @@
 
 #include "GlHeader.hpp"
 
-#include "Log.hpp"
-#include "HelperLibMath.hpp"
+#include "Helperlib/Log.hpp"
+#include "Helperlib/HelperLibMath.hpp"
 
 #include "FileIo.hpp"
 #include "Bmp.hpp"
@@ -17,6 +17,7 @@
 #include "Filters.h"
 #include "conf.h"
 
+#include "foam.hpp"
 #include "draw.hpp"
 
 #include "os.h"
@@ -26,6 +27,7 @@
 
 #include "endian.hpp"
 
+#include "rsa.h"
 #include "SceneGraph.hpp"
 
 using namespace std;
@@ -140,6 +142,15 @@ void writeObjects(SceneGraphNode* node, ofstream* out, unsigned int level=0){
 		}else if(node->object.type==NULL3D){
 			node->object.null->sceneGraphLevel=level;
 			node->object.null->write(*out);
+		}else if(node->object.type==IK_EFFECTOR){
+			node->object.ikEffector->sceneGraphLevel=level;
+			node->object.ikEffector->write(*out);
+		}else if(node->object.type==IK_ROOT){
+			node->object.ikRoot->sceneGraphLevel=level;
+			node->object.ikRoot->write(*out);
+		}else if(node->object.type==IK_JOINT){
+			node->object.ikJoint->sceneGraphLevel=level;
+			node->object.ikJoint->write(*out);
 		}else if(node->object.type==LIGHT){
 			node->object.light->sceneGraphLevel=level;
 			node->object.light->write(*out);
@@ -176,6 +187,12 @@ unsigned long writeObjectsHeader(SceneGraphNode* node, ofstream* out, unsigned l
 		}else if(node->object.type==NULL3D){
 			unsigned long us=node->object.null->size();
 			fpos+=us;
+		}else if(node->object.type==IK_EFFECTOR){
+			
+		}else if(node->object.type==IK_ROOT){
+			
+		}else if(node->object.type==IK_JOINT){
+			
 		}else if(node->object.type==CAMERA){
 
 		}else{

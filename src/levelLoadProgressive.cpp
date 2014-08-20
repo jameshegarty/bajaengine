@@ -6,8 +6,8 @@
 #include <iostream> 
 #include <fstream>
 
-#include "Log.hpp"
-#include "HelperLibMath.hpp"
+#include "Helperlib/Log.hpp"
+#include "Helperlib/HelperLibMath.hpp"
 
 #include "FileIo.hpp"
 #include "Bmp.hpp"
@@ -16,12 +16,15 @@
 #include "light.h"
 #include "Filters.h"
 #include "conf.h"
+#include "foam.hpp"
 #include "draw.hpp"
 #include "os.h"
 #include "timeing.hpp"
 #include "script.hpp"
 #include "endian.hpp"
+#include "rsa.h"
 #include "SceneGraph.hpp"
+#include "editor.h"
 #include "leaks.h"
 
 #ifdef _WIN32
@@ -100,6 +103,221 @@ void updateProgressBar(){
 #endif
 }
 
+void Level::resolveEnvelopes(){
+
+	Map<unsigned int,Array<float> > hash;
+
+	for(int i=0; i<nonstaticObjects.size(); i++){
+
+		Object* object=nonstaticObjects[i];
+		
+
+		if(object->envelopes.size()>0){
+			
+			hash.clear();
+
+			for(int e=0; e<object->envelopes.size(); e++){
+
+				for(int n=0; n<object->envelopes[e].indices.size(); n++){
+					while(hash[object->envelopes[e].indices[n]].size()<object->envelopes.size()){
+						hash[object->envelopes[e].indices[n]].pushBack(0);
+					}
+
+					hash[object->envelopes[e].indices[n]][e]=object->envelopes[e].weights[n]/float(100);
+				}
+
+				//get deformer pointer
+				ObjectAddress a;
+
+				String nam=object->envelopes[e].deformerName;
+
+				if(object->envelopes[e].deformerType==0){
+					a.type=OBJECT;
+					a.object=objectKey[object->envelopes[e].deformerName];
+				}else if(object->envelopes[e].deformerType==3){
+					a.type=NULL3D;
+					a.null=nullKey[object->envelopes[e].deformerName];
+				}else if(object->envelopes[e].deformerType==8){
+					a.type=IK_EFFECTOR;
+					a.ikEffector=ikEffectorKey[object->envelopes[e].deformerName];
+				}else if(object->envelopes[e].deformerType==5){
+					a.type=IK_ROOT;
+					a.ikRoot=ikRootKey[object->envelopes[e].deformerName];
+				}else if(object->envelopes[e].deformerType==7){
+					a.type=IK_JOINT;
+					a.ikJoint=ikJointKey[object->envelopes[e].deformerName];
+				}else{
+
+				}
+
+
+				object->envelopes[e].deformer=new ObjectAddress;
+				*object->envelopes[e].deformer=a;
+			}
+
+
+			for(int v=0; v<object->getVertexCount(); v++){
+
+				float* t=new float[object->envelopes.size()];
+
+				for(int f=0; f<object->envelopes.size(); f++){
+					int envindex=object->getVertexRaw(v).envelopeIndex;
+
+					t[f]=hash[envindex][f];
+				}
+
+				object->getVertexRaw(v).envelope=t;
+			}
+
+		}
+	}
+}
+
+void Level::resolveChains(){
+	for(int i=0; i<ikRoots.size(); i++){
+		for(int j=0; j<ikRoots[i]->jointNames.size(); j++){
+
+			IkJoint* joi=ikJointKey[ikRoots[i]->jointNames[j]];
+			ikRoots[i]->joints.pushBack(joi);
+		}
+	}
+
+	for(int i=0; i<ikEffectors.size(); i++){
+		IkRoot* joi=ikRootKey[ikEffectors[i]->rootName];
+		ikEffectors[i]->root=joi;
+	}
+
+	for(int i=0; i<ikJoints.size(); i++){
+		IkRoot* joi=ikRootKey[ikJoints[i]->rootName];
+		ikJoints[i]->root=joi;
+
+		
+	}
+
+	//generate localized bases
+
+	Matrix4d4d m;
+
+	for(int i=0; i<ikRoots.size(); i++){
+		IkRoot* r=ikRoots[i];
+
+		for(int j=0; j<ikRoots[i]->joints.size(); j++){
+
+			m.loadIdentity();
+
+			for(int k=j-1; k>=0; k--){
+				m.rotateX(-r->joints[k]->localBaseRot.x);
+				m.rotateY(-r->joints[k]->localBaseRot.y);
+				m.rotateZ(-r->joints[k]->localBaseRot.z);
+			}
+
+			m.rotateX(-r->baseRot.x);
+			m.rotateY(-r->baseRot.y);
+			m.rotateZ(-r->baseRot.z);
+
+			m.rotateZ(r->joints[j]->baseRot.z);
+			m.rotateY(r->joints[j]->baseRot.y);
+			m.rotateX(r->joints[j]->baseRot.x);
+
+			r->joints[j]->localBaseRot=m.getRotation();
+		}
+	}
+}
+
+template<class T>
+void resolveSingleConstraint(Level* clvl, T list){
+	for(int i=0; i<list->size(); i++){
+
+		if((*list)[i]->constraintPosName!=""){
+
+			ObjectAddress a;
+		
+			if((*list)[i]->constraintPosType==3){
+				a.null=clvl->nullKey[(*list)[i]->constraintPosName];
+				a.type=NULL3D;
+			}else if((*list)[i]->constraintPosType==5){
+				a.ikRoot=clvl->ikRootKey[(*list)[i]->constraintPosName];
+				a.type=IK_ROOT;
+			}else if((*list)[i]->constraintPosType==7){
+				a.ikJoint=clvl->ikJointKey[(*list)[i]->constraintPosName];
+				a.type=IK_JOINT;
+			}else if((*list)[i]->constraintPosType==8){
+				
+				a.ikEffector=clvl->ikEffectorKey[(*list)[i]->constraintPosName];
+				a.type=IK_EFFECTOR;
+			}else if((*list)[i]->constraintPosType==0){
+				
+				a.object=clvl->objectKey[(*list)[i]->constraintPosName];
+				a.type=OBJECT;
+			}else{
+
+			}
+
+			(*list)[i]->constraintPos=new ObjectAddress;
+			*(*list)[i]->constraintPos=a;
+		}
+		
+		if((*list)[i]->constraintRotName!=""){
+			ObjectAddress a;
+		
+			if((*list)[i]->constraintRotType==3){
+				a.null=clvl->nullKey[(*list)[i]->constraintRotName];
+				a.type=NULL3D;
+			}else if((*list)[i]->constraintRotType==5){
+				a.ikRoot=clvl->ikRootKey[(*list)[i]->constraintRotName];
+				a.type=IK_ROOT;
+			}else if((*list)[i]->constraintRotType==7){
+				a.ikJoint=clvl->ikJointKey[(*list)[i]->constraintRotName];
+				a.type=IK_JOINT;
+			}else if((*list)[i]->constraintRotType==8){
+				a.ikEffector=clvl->ikEffectorKey[(*list)[i]->constraintRotName];
+				a.type=IK_EFFECTOR;
+			}else if((*list)[i]->constraintRotType==0){
+				a.object=clvl->objectKey[(*list)[i]->constraintRotName];
+				a.type=OBJECT;
+			}else{
+
+			}
+
+			(*list)[i]->constraintRot=new ObjectAddress;
+			*(*list)[i]->constraintRot=a;
+		}
+		
+		if((*list)[i]->constraintScaleName!=""){
+			ObjectAddress a;
+		
+			if((*list)[i]->constraintScaleType==3){
+				a.null=clvl->nullKey[(*list)[i]->constraintScaleName];
+				a.type=NULL3D;
+			}else if((*list)[i]->constraintScaleType==5){
+				a.ikRoot=clvl->ikRootKey[(*list)[i]->constraintScaleName];
+				a.type=IK_ROOT;
+			}else if((*list)[i]->constraintScaleType==7){
+				a.ikJoint=clvl->ikJointKey[(*list)[i]->constraintScaleName];
+				a.type=IK_JOINT;
+			}else if((*list)[i]->constraintScaleType==8){
+				a.ikEffector=clvl->ikEffectorKey[(*list)[i]->constraintScaleName];
+				a.type=IK_EFFECTOR;
+			}else if((*list)[i]->constraintScaleType==0){
+				a.object=clvl->objectKey[(*list)[i]->constraintScaleName];
+				a.type=OBJECT;
+			}else{
+
+			}
+
+			(*list)[i]->constraintScale=new ObjectAddress;
+			*(*list)[i]->constraintScale=a;
+		}
+	}
+}
+
+void Level::resolveConstraints(){
+
+
+	resolveSingleConstraint< Array<Object*>* >(this,&objects);
+	resolveSingleConstraint< Array<IkRoot*>* >(this,&ikRoots);
+	resolveSingleConstraint< Array<NullObject*>* >(this,&nulls);
+}
 
 bool Level::load(Path infile){	
 	
@@ -944,6 +1162,9 @@ bool Level::load(Path infile){
 	Object* currentObject=NULL;
 	NullObject* currentNull=NULL;
 	Light* currentLight=NULL;
+	IkRoot* currentIkRoot=NULL;
+	IkJoint* currentIkJoint=NULL;
+	IkEffector* currentIkEffector=NULL;
 	Curve* currentCurve=NULL;
 	Camera* cCam=NULL;
 
@@ -1261,6 +1482,85 @@ bool Level::load(Path infile){
 			cCam->rot=rot;
 			cCam->scale=scale;
 
+		}else if(currentObject->type==5){
+			//ik root
+			IkRoot* chain=new IkRoot;
+
+
+			chain->name=currentObject->name;
+
+			in.read ((char*)&chain->pos.x,sizeof(chain->pos.x));
+			in.read ((char*)&chain->pos.y,sizeof(chain->pos.y));
+			in.read ((char*)&chain->pos.z,sizeof(chain->pos.z));
+			chain->pos.x=endian(chain->pos.x);
+			chain->pos.y=endian(chain->pos.y);
+			chain->pos.z=endian(chain->pos.z);
+			
+			in.read ((char*)&chain->rot.x,sizeof(chain->rot.x));
+			in.read ((char*)&chain->rot.y,sizeof(chain->rot.y));
+			in.read ((char*)&chain->rot.z,sizeof(chain->rot.z));
+			chain->rot.x=endian(chain->rot.x);
+			chain->rot.y=endian(chain->rot.y);
+			chain->rot.z=endian(chain->rot.z);
+			
+			in.read ((char*)&chain->scale.x,sizeof(chain->scale.x));
+			in.read ((char*)&chain->scale.y,sizeof(chain->scale.y));
+			in.read ((char*)&chain->scale.z,sizeof(chain->scale.z));
+			chain->scale.x=endian(chain->scale.x);
+			chain->scale.y=endian(chain->scale.y);
+			chain->scale.z=endian(chain->scale.z);
+
+			unsigned long vertexcount;
+			in.read ((char*)&vertexcount,sizeof(vertexcount));	
+			vertexcount=endian(vertexcount);
+
+			unsigned int hasBP=0;
+			in.read ((char*)&hasBP,4);
+			hasBP=endian(hasBP);
+			if(hasBP==1){chain->hasBasePose=true;}else{chain->hasBasePose=false;}
+
+			//////////////////////////////////////////////////////////////////////
+			in.read ((char*)&chain->basePos.x,4);
+			in.read ((char*)&chain->basePos.y,4);
+			in.read ((char*)&chain->basePos.z,4);
+			chain->basePos.x=endian(chain->basePos.x);
+			chain->basePos.y=endian(chain->basePos.y);
+			chain->basePos.z=endian(chain->basePos.z);
+			
+			in.read ((char*)&chain->baseRot.x,4);
+			in.read ((char*)&chain->baseRot.y,4);
+			in.read ((char*)&chain->baseRot.z,4);
+			chain->baseRot.x=endian(chain->baseRot.x);
+			chain->baseRot.y=endian(chain->baseRot.y);
+			chain->baseRot.z=endian(chain->baseRot.z);
+			
+			in.read ((char*)&chain->baseScale.x,4);
+			in.read ((char*)&chain->baseScale.y,4);
+			in.read ((char*)&chain->baseScale.z,4);
+			chain->baseScale.x=endian(chain->baseScale.x);
+			chain->baseScale.y=endian(chain->baseScale.y);
+			chain->baseScale.z=endian(chain->baseScale.z);
+
+			for(int cv=0; cv<vertexcount; cv++){
+
+				String nam;
+				nam.read(&in);
+				chain->jointNames.pushBack(nam);
+				
+			}
+
+			chain->constraintPosName=currentObject->constraintPosName;
+			chain->constraintPosType=currentObject->constraintPosType;
+
+			chain->constraintRotName=currentObject->constraintRotName;
+			chain->constraintRotType=currentObject->constraintRotType;
+
+			chain->constraintScaleName=currentObject->constraintScaleName;
+			chain->constraintScaleType=currentObject->constraintScaleType;
+
+			ikRoots.pushBack(chain);
+			ikRootKey[chain->name]=chain;
+			currentIkRoot=chain;
 		}else if(currentObject->type==6){
 
 			FloatVector3d pos,rot,scale;
@@ -1290,6 +1590,118 @@ bool Level::load(Path infile){
 			in.read ((char*)&verCount,4);
 			verCount=endian(verCount);
 			
+		}else if(currentObject->type==7){
+			//ik chain
+			IkJoint* chain=new IkJoint;
+
+			chain->name=currentObject->name;
+			in.read ((char*)&chain->pos.x,sizeof(chain->pos.x));
+			in.read ((char*)&chain->pos.y,sizeof(chain->pos.y));
+			in.read ((char*)&chain->pos.z,sizeof(chain->pos.z));
+			chain->pos.x=endian(chain->pos.x);
+			chain->pos.y=endian(chain->pos.y);
+			chain->pos.z=endian(chain->pos.z);
+			
+			in.read ((char*)&chain->rot.x,sizeof(chain->rot.x));
+			in.read ((char*)&chain->rot.y,sizeof(chain->rot.y));
+			in.read ((char*)&chain->rot.z,sizeof(chain->rot.z));
+			chain->rot.x=endian(chain->rot.x);
+			chain->rot.y=endian(chain->rot.y);
+			chain->rot.z=endian(chain->rot.z);
+			
+			in.read ((char*)&chain->scale.x,sizeof(chain->scale.x));
+			in.read ((char*)&chain->scale.y,sizeof(chain->scale.y));
+			in.read ((char*)&chain->scale.z,sizeof(chain->scale.z));
+			chain->scale.x=endian(chain->scale.x);
+			chain->scale.y=endian(chain->scale.y);
+			chain->scale.z=endian(chain->scale.z);
+
+			unsigned long vertexcount;
+			in.read ((char*)&vertexcount,sizeof(vertexcount));	
+			vertexcount=endian(vertexcount);
+
+			unsigned int hasBP=0;
+			in.read ((char*)&hasBP,4);
+			hasBP=endian(hasBP);
+			if(hasBP==1){chain->hasBasePose=true;}else{chain->hasBasePose=false;}
+
+			in.read ((char*)&chain->basePos.x,4);
+			in.read ((char*)&chain->basePos.y,4);
+			in.read ((char*)&chain->basePos.z,4);
+			chain->basePos.x=endian(chain->basePos.x);
+			chain->basePos.y=endian(chain->basePos.y);
+			chain->basePos.z=endian(chain->basePos.z);
+			
+			in.read ((char*)&chain->baseRot.x,4);
+			in.read ((char*)&chain->baseRot.y,4);
+			in.read ((char*)&chain->baseRot.z,4);
+			chain->baseRot.x=endian(chain->baseRot.x);
+			chain->baseRot.y=endian(chain->baseRot.y);
+			chain->baseRot.z=endian(chain->baseRot.z);
+			
+			in.read ((char*)&chain->baseScale.x,4);
+			in.read ((char*)&chain->baseScale.y,4);
+			in.read ((char*)&chain->baseScale.z,4);
+			chain->baseScale.x=endian(chain->baseScale.x);
+			chain->baseScale.y=endian(chain->baseScale.y);
+			chain->baseScale.z=endian(chain->baseScale.z);
+
+			in.read ((char*)&chain->length,sizeof(chain->length));
+			chain->length=endian(chain->length);
+
+			chain->rootName.read(&in);
+
+			
+			in.read ((char*)&chain->preferedRot.x,4);
+			chain->preferedRot.x=endian(chain->preferedRot.x);
+			in.read ((char*)&chain->preferedRot.y,4);
+			chain->preferedRot.y=endian(chain->preferedRot.y);
+			in.read ((char*)&chain->preferedRot.z,4);
+			chain->preferedRot.z=endian(chain->preferedRot.z);
+
+
+			ikJoints.pushBack(chain);
+			ikJointKey[chain->name]=chain;
+			currentIkJoint=chain;
+		}else if(currentObject->type==8){
+			//ik eff
+			IkEffector* chain=new IkEffector;
+
+			chain->name=currentObject->name;
+
+			in.read ((char*)&chain->pos.x,sizeof(chain->pos.x));
+			in.read ((char*)&chain->pos.y,sizeof(chain->pos.y));
+			in.read ((char*)&chain->pos.z,sizeof(chain->pos.z));
+			chain->pos.x=endian(chain->pos.x);
+			chain->pos.y=endian(chain->pos.y);
+			chain->pos.z=endian(chain->pos.z);
+			
+			in.read ((char*)&chain->rot.x,sizeof(chain->rot.x));
+			in.read ((char*)&chain->rot.y,sizeof(chain->rot.y));
+			in.read ((char*)&chain->rot.z,sizeof(chain->rot.z));
+			chain->rot.x=endian(chain->rot.x);
+			chain->rot.y=endian(chain->rot.y);
+			chain->rot.z=endian(chain->rot.z);
+			
+			in.read ((char*)&chain->scale.x,sizeof(chain->scale.x));
+			in.read ((char*)&chain->scale.y,sizeof(chain->scale.y));
+			in.read ((char*)&chain->scale.z,sizeof(chain->scale.z));
+			chain->scale.x=endian(chain->scale.x);
+			chain->scale.y=endian(chain->scale.y);
+			chain->scale.z=endian(chain->scale.z);
+
+			unsigned long vertexcount;
+			in.read ((char*)&vertexcount,sizeof(vertexcount));	
+			vertexcount=endian(vertexcount);
+
+			String nam;
+			nam.read(&in);
+			
+			chain->rootName=nam;
+
+			ikEffectors.pushBack(chain);
+			ikEffectorKey[chain->name]=chain;
+			currentIkEffector=chain;
 		}else if(currentObject->type==9){
 
 			FloatVector3d pos,rot,scale;
@@ -1357,7 +1769,47 @@ bool Level::load(Path infile){
 			unsigned int anicount=0;
 			in.read ((char*)&anicount,4);
 			anicount=endian(anicount);
-      assert(anicount==0);
+			
+			for(int anii=0; anii<anicount; anii++){
+
+				currentObject->animations.pushBack();
+
+				unsigned int keycount=0;
+				in.read((char*)&keycount,sizeof(keycount));
+				keycount=endian(keycount);
+				in.read((char*)&currentObject->animations[anii].type,sizeof(currentObject->animations[anii].type));
+				currentObject->animations[anii].type=endian(currentObject->animations[anii].type);
+				in.read((char*)&currentObject->animations[anii].fps,sizeof(currentObject->animations[anii].fps));
+				currentObject->animations[anii].fps=endian(currentObject->animations[anii].fps);
+				in.read((char*)&currentObject->animations[anii].start,sizeof(currentObject->animations[anii].start));
+				currentObject->animations[anii].start=endian(currentObject->animations[anii].start);
+				in.read((char*)&currentObject->animations[anii].end,sizeof(currentObject->animations[anii].end));
+				currentObject->animations[anii].end=endian(currentObject->animations[anii].end);
+				
+				currentObject->animations[anii].variable.read(&in);
+				currentObject->animations[anii].name.read(&in);
+
+				for(int keyi=0; keyi<keycount; keyi++){
+					currentObject->animations[anii].keys.pushBack();
+
+					in.read((char*)&currentObject->animations[anii].keys[keyi].frame,sizeof(currentObject->animations[anii].keys[keyi].frame));
+					currentObject->animations[anii].keys[keyi].frame=endian(currentObject->animations[anii].keys[keyi].frame);
+					in.read((char*)&currentObject->animations[anii].keys[keyi].value,sizeof(currentObject->animations[anii].keys[keyi].value));
+					currentObject->animations[anii].keys[keyi].value=endian(currentObject->animations[anii].keys[keyi].value);
+
+					if(currentObject->animations[anii].type==2){
+						in.read((char*)&currentObject->animations[anii].keys[keyi].leftTanX,sizeof(currentObject->animations[anii].keys[keyi].leftTanX));
+						currentObject->animations[anii].keys[keyi].leftTanX=endian(currentObject->animations[anii].keys[keyi].leftTanX);
+						in.read((char*)&currentObject->animations[anii].keys[keyi].leftTanY,sizeof(currentObject->animations[anii].keys[keyi].leftTanY));
+						currentObject->animations[anii].keys[keyi].leftTanY=endian(currentObject->animations[anii].keys[keyi].leftTanY);
+						in.read((char*)&currentObject->animations[anii].keys[keyi].rightTanX,sizeof(currentObject->animations[anii].keys[keyi].rightTanX));
+						currentObject->animations[anii].keys[keyi].rightTanX=endian(currentObject->animations[anii].keys[keyi].rightTanX);
+						in.read((char*)&currentObject->animations[anii].keys[keyi].rightTanY,sizeof(currentObject->animations[anii].keys[keyi].rightTanY));
+						currentObject->animations[anii].keys[keyi].rightTanY=endian(currentObject->animations[anii].keys[keyi].rightTanY);
+
+					}
+				}
+			}
 		}
 
 		if(version==2){
@@ -1366,9 +1818,80 @@ bool Level::load(Path infile){
 			unsigned int envcount=0;
 			in.read ((char*)&envcount,4);
 			envcount=endian(envcount);
-      assert(envcount==0);
-    }
+
+			if(currentObject->type==0 || currentObject->type==3){
+				unsigned int hasBP=0;
+				in.read ((char*)&hasBP,4);
+				hasBP=endian(hasBP);
+				if(hasBP==1){currentObject->hasBasePose=true;}else{currentObject->hasBasePose=false;}
+
+				in.read ((char*)&currentObject->basePos.x,4);
+				currentObject->basePos.x=endian(currentObject->basePos.x);
+				in.read ((char*)&currentObject->basePos.y,4);
+				currentObject->basePos.y=endian(currentObject->basePos.y);
+				in.read ((char*)&currentObject->basePos.z,4);
+				currentObject->basePos.z=endian(currentObject->basePos.z);
+
+				in.read ((char*)&currentObject->baseRot.x,4);
+				currentObject->baseRot.x=endian(currentObject->baseRot.x);
+				in.read ((char*)&currentObject->baseRot.y,4);
+				currentObject->baseRot.y=endian(currentObject->baseRot.y);
+				in.read ((char*)&currentObject->baseRot.z,4);
+				currentObject->baseRot.z=endian(currentObject->baseRot.z);
+
+				in.read ((char*)&currentObject->baseScale.x,4);
+				currentObject->baseScale.x=endian(currentObject->baseScale.x);
+				in.read ((char*)&currentObject->baseScale.y,4);
+				currentObject->baseScale.y=endian(currentObject->baseScale.y);
+				in.read ((char*)&currentObject->baseScale.z,4);
+				currentObject->baseScale.z=endian(currentObject->baseScale.z);
+			}
+
+			for(int env=0; env<envcount; env++){
+
+				ObjectEnvelope envelope;
+				envelope.deformerName.read(&in);
+
+				in.read ((char*)&envelope.deformerType,4);
+				envelope.deformerType=endian(envelope.deformerType);
+				
+				//unsigned int maxindex=0;
+
+				unsigned int vcnt=0;
+				in.read ((char*)&vcnt,4);
+				vcnt=endian(vcnt);
+				
+				for(int vv=0; vv<vcnt; vv++){
+					unsigned int index=0;
+					float weight=0;
+
+					in.read ((char*)&index,4);
+					index=endian(index);
+					in.read ((char*)&weight,4);
+					weight=endian(weight);
+
+					envelope.indices.pushBack(index);
+					envelope.weights.pushBack(weight);
+				}
+
+				currentObject->envelopes.pushBack(envelope);
+			}
+		}
 		
+		if(currentObject->type==3){
+			currentNull->animations=currentObject->animations;
+			currentNull->basePos=currentObject->basePos;
+			currentNull->baseRot=currentObject->baseRot;
+			currentNull->baseScale=currentObject->baseScale;
+			currentNull->hasBasePose=currentObject->hasBasePose;
+		}else if(currentObject->type==5){
+			currentIkRoot->animations=currentObject->animations;
+		}else if(currentObject->type==7){
+			currentIkJoint->animations=currentObject->animations;
+		}else if(currentObject->type==8){
+			currentIkEffector->animations=currentObject->animations;
+		}
+
 		
 		if(version==2){
 
@@ -1386,6 +1909,15 @@ bool Level::load(Path infile){
 			}else if(currentObject->type==4){
 				oa.type=CAMERA;
 				oa.camera=cCam;
+			}else if(currentObject->type==5){
+				oa.type=IK_ROOT;
+				oa.ikRoot=currentIkRoot;
+			}else if(currentObject->type==7){
+				oa.type=IK_JOINT;
+				oa.ikJoint=currentIkJoint;
+			}else if(currentObject->type==8){
+				oa.type=IK_EFFECTOR;
+				oa.ikEffector=currentIkEffector;
 			}else if(currentObject->type==9){
 				oa.type=CURVE;
 				oa.curve=currentCurve;
@@ -1441,6 +1973,12 @@ bool Level::load(Path infile){
 				currentLight->sceneGraphNode=currentNode;
 			}else if(currentObject->type==2){
 				currentLight->sceneGraphNode=currentNode;
+			}else if(currentObject->type==7){
+				currentIkJoint->sceneGraphNode=currentNode;
+			}else if(currentObject->type==8){
+				currentIkEffector->sceneGraphNode=currentNode;
+			}else if(currentObject->type==5){
+				currentIkRoot->sceneGraphNode=currentNode;
 			}else if(currentObject->type==3){
 				currentNull->sceneGraphNode=currentNode;
 			}else if(currentObject->type==4){
@@ -1536,6 +2074,26 @@ bool Level::load(Path infile){
 				materials[currentObject->material].nonstaticRefList.pushBack(currentObject);
 			}else if(!(currentObject->flags & OBJECT_TRANSPARENT) &&
 				(currentObject->flags & OBJECT_STATIC) &&
+				(currentObject->envelopes.size()>0) &&
+				!transhack &&
+				version==2){
+				//enveloped objs need to be nonstatic
+
+				nonstaticObjects.pushBack(currentObject);
+				materials[currentObject->material].nonstaticRefs++;
+				materials[currentObject->material].nonstaticRefList.pushBack(currentObject);
+			}else if(!(currentObject->flags & OBJECT_TRANSPARENT) &&
+				(currentObject->flags & OBJECT_STATIC) &&
+				(currentObject->animations.size()>0) &&
+				!transhack &&
+				version==2){
+				//animated objs need to be nonstatic
+
+				nonstaticObjects.pushBack(currentObject);
+				materials[currentObject->material].nonstaticRefs++;
+				materials[currentObject->material].nonstaticRefList.pushBack(currentObject);
+			}else if(!(currentObject->flags & OBJECT_TRANSPARENT) &&
+				(currentObject->flags & OBJECT_STATIC) &&
 				version==2 &&
 				!transhack){
 				//objs with nonstatic parents need to be nonstatic
@@ -1608,6 +2166,39 @@ bool Level::load(Path infile){
 				if(!(currentObject->flags & OBJECT_STATIC)){
 					luaUpload(currentNull);
 				}
+			}else if(currentObject->type==5 && currentIkRoot!=NULL){
+
+				if(!(currentObject->flags & OBJECT_STATIC)){
+					luaUpload(currentIkRoot);
+				}
+
+				if(currentObject->flags & OBJECT_VISIBLE){
+					currentIkRoot->visible=true;
+				}else{
+					currentIkRoot->visible=false;
+				}
+			}else if(currentObject->type==7 && currentIkJoint!=NULL){
+
+				if(!(currentObject->flags & OBJECT_STATIC)){
+					luaUpload(currentIkJoint);
+				}
+
+				if(currentObject->flags & OBJECT_VISIBLE){
+					currentIkJoint->visible=true;
+				}else{
+					currentIkJoint->visible=false;
+				}
+			}else if(currentObject->type==8 && currentIkEffector!=NULL){
+
+				if(!(currentObject->flags & OBJECT_STATIC)){
+					luaUpload(currentIkJoint);
+				}
+
+				if(currentObject->flags & OBJECT_VISIBLE){
+					currentIkEffector->visible=true;
+				}else{
+					currentIkEffector->visible=false;
+				}
 			}else if(currentObject->type==9 && currentCurve!=NULL){
 
 				if(!(currentObject->flags & OBJECT_STATIC)){
@@ -1628,6 +2219,10 @@ bool Level::load(Path infile){
 	logs().main.write("OBJECTS:"+String(engineTime.getTimerSingle("OBJECTS")));
 
 	engineTime.startTimerSingle("ENDFUNCTS");
+
+	resolveChains();
+	resolveConstraints();
+	resolveEnvelopes();
 
 	//call create functions
 	for(int i=0; i<objects.size(); i++){

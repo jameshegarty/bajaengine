@@ -1,6 +1,7 @@
 #include "GlHeader.hpp"
 
 #include "draw.hpp"
+#include "DrawDynamic.h"
 #include "level.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -9,9 +10,9 @@
 #include "hardware.hpp"
 #include "random.h"
 
-#include "Log.hpp"
-#include "sort.hpp"
-#include "HelperLibMath.hpp"
+#include "Helperlib/Log.hpp"
+#include "Helperlib/sort.hpp"
+#include "Helperlib/HelperLibMath.hpp"
 
 #include "SceneGraph.hpp"
 #include "lightmap.h"
@@ -223,12 +224,13 @@ void drawArrayInner(Object* object,bool transform){
 			  level->materials[object->material].textureEnvironmentBack!=-1  && 
 			  hardware.fragmentProgram);
 	
+	bool envelope=object->envelopes.size()>0;
 	
 #ifndef SOFTWARE_TRANSFORMS
 	
 	if(transform){
 		
-		if(!disp && !disp_spec && !spec){
+		if(!disp && !disp_spec && !spec && !envelope){
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
 			glTranslatef(object->pos.x,object->pos.y,object->pos.z);
@@ -385,7 +387,155 @@ void drawArrayInner(Object* object,bool transform){
 		glMultiTexCoord2fARB(GL_TEXTURE0_ARB, vertex->uv0.x, vertex->uv0.y);
 		glMultiTexCoord2fARB(GL_TEXTURE1_ARB, vertex->uvLightmap.x,vertex->uvLightmap.y);
 		
-    if(level->materials[object->material].shader & MATERIAL_SHADER_MIXER){
+		if(object->envelopes.size()>0){
+			FloatVector4d a,b,c,d,e,f;
+			
+			int offset=0;
+			
+			if(object->envelopeVerticesCount>1){
+				
+				for(int fr=0; fr< object->envelopeVerticesEnvelopes[object->drawCurrentEnvelope].size(); fr++){
+					
+					int indf=object->envelopeVerticesEnvelopes[object->drawCurrentEnvelope][fr];
+					
+					int baseline=object->envelopeVerticesEnvelopes[object->drawCurrentEnvelope][0];
+					
+					int tindex=fr;
+					baseline=0;
+					
+					if( (tindex-0-baseline) == 0){
+						a.x=vertex->envelope[indf];
+					}else if( (tindex-1-baseline) == 0){
+						a.y=vertex->envelope[indf];
+					}else if( (tindex-2-baseline) == 0){
+						a.z=vertex->envelope[indf];
+					}else if( (tindex-3-baseline) == 0){
+						a.w=vertex->envelope[indf];
+					}else if( (tindex-4-baseline) == 0){
+						b.x=vertex->envelope[indf];
+					}else if( (tindex-5-baseline) == 0){
+						b.y=vertex->envelope[indf];
+					}else if( (tindex-6-baseline) == 0){
+						b.z=vertex->envelope[indf];
+					}else if( (tindex-7-baseline) == 0){
+						b.w=vertex->envelope[indf];
+					}else if( (tindex-8-baseline) == 0){
+						c.x=vertex->envelope[indf];
+					}else if( (tindex-9-baseline) == 0){
+						c.y=vertex->envelope[indf];
+					}else if( (tindex-10-baseline) == 0){
+						c.z=vertex->envelope[indf];
+					}else if( (tindex-11-baseline) == 0){
+						c.w=vertex->envelope[indf];
+					}else if( (tindex-12-baseline) == 0){
+						d.x=vertex->envelope[indf];
+					}else if( (tindex-13-baseline) == 0){
+						d.y=vertex->envelope[indf];
+					}else if( (tindex-14-baseline) == 0){
+						d.z=vertex->envelope[indf];
+					}else if( (tindex-15-baseline) == 0){
+						d.w=vertex->envelope[indf];
+					}else if( (tindex-16-baseline) == 0){
+						e.x=vertex->envelope[indf];
+					}else if( (tindex-17-baseline) == 0){
+						e.y=vertex->envelope[indf];
+					}else if( (tindex-18-baseline) == 0){
+						e.z=vertex->envelope[indf];
+					}else if( (tindex-19-baseline) == 0){
+						e.w=vertex->envelope[indf];
+					}else if( (tindex-20-baseline) == 0){
+						f.x=vertex->envelope[indf];
+					}else if( (tindex-21-baseline) == 0){
+						f.y=vertex->envelope[indf];
+					}else if( (tindex-22-baseline) == 0){
+						f.z=vertex->envelope[indf];
+					}else if( (tindex-23-baseline) == 0){
+						f.w=vertex->envelope[indf];
+					}
+				}
+				
+			}else{
+				a.x=vertex->envelope[0+offset];
+				
+				if(object->envelopes.size()>1+offset){
+					a.y=vertex->envelope[1+offset];
+				}
+				if(object->envelopes.size()>2+offset){
+					a.z=vertex->envelope[2+offset];
+				}
+				if(object->envelopes.size()>3+offset){
+					a.w=vertex->envelope[3+offset];
+				}
+				if(object->envelopes.size()>4+offset){
+					b.x=vertex->envelope[4+offset];
+				}
+				if(object->envelopes.size()>5+offset){
+					b.y=vertex->envelope[5+offset];
+				}
+				if(object->envelopes.size()>6+offset){
+					b.z=vertex->envelope[6+offset];
+				}
+				if(object->envelopes.size()>7+offset){
+					b.w=vertex->envelope[7+offset];
+				}
+				if(object->envelopes.size()>8+offset){
+					c.x=vertex->envelope[8+offset];
+				}
+				if(object->envelopes.size()>9+offset){
+					c.y=vertex->envelope[9+offset];
+				}
+				if(object->envelopes.size()>10+offset){
+					c.z=vertex->envelope[10+offset];
+				}
+				if(object->envelopes.size()>11+offset){
+					c.w=vertex->envelope[11+offset];
+				}
+				if(object->envelopes.size()>12+offset){
+					d.x=vertex->envelope[12+offset];
+				}
+				if(object->envelopes.size()>13+offset){
+					d.y=vertex->envelope[13+offset];
+				}
+				if(object->envelopes.size()>14+offset){
+					d.z=vertex->envelope[14+offset];
+				}
+				if(object->envelopes.size()>15+offset){
+					d.w=vertex->envelope[15+offset];
+				}
+				if(object->envelopes.size()>16+offset){
+					e.x=vertex->envelope[16+offset];
+				}
+				if(object->envelopes.size()>17+offset){
+					e.y=vertex->envelope[17+offset];
+				}
+				if(object->envelopes.size()>18+offset){
+					e.z=vertex->envelope[18+offset];
+				}
+				if(object->envelopes.size()>19+offset){
+					e.w=vertex->envelope[19+offset];
+				}
+				if(object->envelopes.size()>20+offset){
+					f.x=vertex->envelope[20+offset];
+				}
+				if(object->envelopes.size()>21+offset){
+					f.y=vertex->envelope[21+offset];
+				}
+				if(object->envelopes.size()>22+offset){
+					f.z=vertex->envelope[22+offset];
+				}
+				if(object->envelopes.size()>23+offset){
+					f.w=vertex->envelope[23+offset];
+				}
+			}
+			
+			glMultiTexCoord3fARB(GL_TEXTURE2_ARB, a.x,a.y,a.z);
+			glMultiTexCoord3fARB(GL_TEXTURE3_ARB, a.w,b.x,b.y);
+			glMultiTexCoord3fARB(GL_TEXTURE4_ARB, b.z,b.w,c.x);
+			glMultiTexCoord3fARB(GL_TEXTURE5_ARB, c.y,c.z,c.w);
+			glMultiTexCoord3fARB(GL_TEXTURE6_ARB, d.x,d.y,d.z);
+			glMultiTexCoord3fARB(GL_TEXTURE7_ARB, d.w,e.x,e.y);
+			
+		}else if(level->materials[object->material].shader & MATERIAL_SHADER_MIXER){
 			glMultiTexCoord2fARB(GL_TEXTURE2_ARB, vertex->uv1.x, vertex->uv1.y);
 			glMultiTexCoord2fARB(GL_TEXTURE3_ARB, vertex->uv2.x, vertex->uv2.y);
 			glMultiTexCoord2fARB(GL_TEXTURE4_ARB, vertex->uv3.x, vertex->uv3.y);
@@ -424,7 +574,7 @@ void drawArrayInner(Object* object,bool transform){
 #ifndef SOFTWARE_TRANSFORMS
 	
 	if(transform){
-		if(!disp && !disp_spec && !spec){
+		if(!disp && !disp_spec && !spec && !envelope){
 			glMatrixMode(GL_MODELVIEW);
 			glPopMatrix();
 		}

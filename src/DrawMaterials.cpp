@@ -10,6 +10,7 @@
 											// Header File For The GLu32 Library
 #include "Gl/Extensions.h"
 #include "draw.hpp"
+#include "DrawDynamic.h"
 #include "level.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -18,8 +19,8 @@
 #include "hardware.hpp"
 #include "random.h"
 
-#include "Log.hpp"
-#include "sort.hpp"
+#include "Helperlib/Log.hpp"
+#include "Helperlib/sort.hpp"
 
 
 #include <math.h>
@@ -202,7 +203,8 @@ void updateMaterial(Object* obj,bool transform){
 
 		if(hardware.fragmentProgram && !transform && 
 			((level->materials[obj->material].shader & MATERIAL_SHADER_DISPLACEMENT) || 
-			(level->materials[obj->material].shader & MATERIAL_SHADER_SPECULAR)) ){
+			(level->materials[obj->material].shader & MATERIAL_SHADER_SPECULAR)) ||
+			obj->envelopes.size()>0 ){
 
 		}else{
 			shader.reset();
@@ -675,6 +677,35 @@ void updateMaterial(Object* obj,bool transform){
 			shadReset=true;
 			//need to undo all camera transforms to view space
 
+		}else if(obj->envelopes.size()>0){
+		
+			shadReset=true;
+
+			if(textureDiffuse!=-1){
+				glActiveTextureARB(GL_TEXTURE0_ARB);
+				glEnable(GL_TEXTURE_2D);
+				glDisable(GL_TEXTURE_CUBE_MAP_ARB);
+
+				glBindTexture(GL_TEXTURE_2D,level->textures[textureDiffuse].glName());
+				shadReset=true;
+			}else{
+				glActiveTextureARB(GL_TEXTURE0_ARB);
+				glDisable(GL_TEXTURE_2D);
+				glDisable(GL_TEXTURE_CUBE_MAP_ARB);
+			}	
+
+			if(obj->lightmap==-1){
+				glActiveTextureARB(GL_TEXTURE1_ARB);
+				glDisable(GL_TEXTURE_2D);
+				glDisable(GL_TEXTURE_CUBE_MAP_ARB);
+			}
+
+			glActiveTextureARB(GL_TEXTURE2_ARB);
+			glDisable(GL_TEXTURE_2D);
+			glDisable(GL_TEXTURE_CUBE_MAP_ARB);
+			glActiveTextureARB(GL_TEXTURE3_ARB);
+			glDisable(GL_TEXTURE_2D);
+			glDisable(GL_TEXTURE_CUBE_MAP_ARB);
 		}else{
 			//plain boring nothing shader
 			glActiveTextureARB(GL_TEXTURE0_ARB);

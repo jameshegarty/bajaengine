@@ -17,7 +17,9 @@
 #include "hardware.hpp"
 
 #include "timeing.hpp"
-#include "HelperLibMath.hpp"
+#include "foam.hpp"
+#include "Helperlib/HelperLibMath.hpp"
+
 using namespace std;
 
 FloatVector2d waterDirection;

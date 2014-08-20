@@ -3,7 +3,7 @@
 #include "shader.hpp"
 #include "conf.h"
 
-#include "HelperLibMath.hpp"
+#include "Helperlib/HelperLibMath.hpp"
 
 Box::Box(){
 	visible=true;
