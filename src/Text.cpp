@@ -1,5 +1,5 @@
 #include "Text.hpp"
-#include "Helperlib/Log.hpp"
+#include "Log.hpp"
 #include "conf.h"
 #include "Bmp.hpp"
 
@@ -12,7 +12,7 @@
 #include "endian.hpp"
 #include <iostream>
 
-#include "Gl/Extensions.h"
+#include "Extensions.h"
 
 #include "os.h"
 

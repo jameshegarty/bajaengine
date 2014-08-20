@@ -1,7 +1,7 @@
 #include "level.hpp"
 #include "draw.hpp"
-#include "Helperlib/sort.hpp"
-#include "Helperlib/HelperLibMath.hpp"
+#include "sort.hpp"
+#include "HelperLibMath.hpp"
 #include "timeing.hpp"
 
 bool modernStaticBuilt=false;

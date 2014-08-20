@@ -9,8 +9,8 @@
 #endif
 
 #include "conf.h"
-#include "Helperlib/Log.hpp"
-#include "Helperlib/HelperLibMath.hpp"
+#include "Log.hpp"
+#include "HelperLibMath.hpp"
 #include "Text.hpp"
 #include "keyboard.h"
 #include "os.h"

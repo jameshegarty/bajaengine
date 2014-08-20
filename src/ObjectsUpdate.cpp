@@ -1,7 +1,7 @@
 #include "Types.hpp"
 
 #include <iostream>
-#include "Helperlib/HelperLibMath.hpp"
+#include "HelperLibMath.hpp"
 #include "conf.h"
 #include "SceneGraph.hpp"
 #include "texture.hpp"
@@ -12,7 +12,7 @@
 
 	#include "GlHeader.hpp"
 	
-	#include "Helperlib/Log.hpp"
+	#include "Log.hpp"
 	#include "os.h"
 #endif
 

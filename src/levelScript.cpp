@@ -5,8 +5,8 @@
 
 #include "GlHeader.hpp"
 
-#include "Helperlib/Log.hpp"
-#include "Helperlib/HelperLibMath.hpp"
+#include "Log.hpp"
+#include "HelperLibMath.hpp"
 
 #include "os.h"
 #include "FileIo.hpp"

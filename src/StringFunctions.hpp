@@ -2,7 +2,7 @@
 #define STRING_FUNCTIONS
 
 #include <string>
-#include "../Types.hpp"
+#include "Types.hpp"
 
 #ifdef MACOSX
     #include <Carbon/Carbon.h>

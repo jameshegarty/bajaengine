@@ -3,7 +3,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "Helperlib/HelperLibMath.hpp"
+#include "HelperLibMath.hpp"
 #include "conf.h"
 #include "SceneGraph.hpp"
 #include "texture.hpp"
@@ -22,7 +22,7 @@
 		#include <GLUT/glut.h>
 	#endif
 	
-	#include "Helperlib/Log.hpp"
+	#include "Log.hpp"
 	#include "os.h"
 
 	

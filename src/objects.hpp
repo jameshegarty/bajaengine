@@ -13,8 +13,8 @@
 #endif
 
 #include "HelperLibString.hpp"
-#include "collision/collision.hpp"
-#include "Helperlib/Containers.hpp"
+#include "collision.hpp"
+#include "Containers.hpp"
 #include "Types.hpp"
 #include "animation.hpp"
 #include "envelope.hpp"

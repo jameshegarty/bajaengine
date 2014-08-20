@@ -3,9 +3,9 @@
 
 #include <al.h>
 
-#include "../os.h"
-#include "../HelperLibString.hpp"
-#include "../Helperlib/Containers.hpp"
+#include "os.h"
+#include "HelperLibString.hpp"
+#include "Containers.hpp"
 
 
 #include <vorbis/vorbisfile.h>

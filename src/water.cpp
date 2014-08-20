@@ -18,7 +18,7 @@
 
 #include "timeing.hpp"
 #include "foam.hpp"
-#include "Helperlib/HelperLibMath.hpp"
+#include "HelperLibMath.hpp"
 
 using namespace std;
 

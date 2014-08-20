@@ -1,9 +1,9 @@
 #include "physics.h"
 #include "script.hpp"
 #include "level.hpp"
-#include "Helperlib/HelperLibMath.hpp"
+#include "HelperLibMath.hpp"
 #include "FileIo.hpp"
-#include "Helperlib/Log.hpp"
+#include "Log.hpp"
 
 Physics physics;
 

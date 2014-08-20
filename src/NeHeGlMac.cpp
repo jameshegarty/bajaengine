@@ -8,7 +8,7 @@
  */
 
 #include "NeHeGlMac.h"
-#include "Helperlib/Log.hpp"
+#include "Log.hpp"
 
 #include "mouse.h"
 

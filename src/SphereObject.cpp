@@ -1,5 +1,5 @@
 #include "SphereObject.hpp"
-#include "Helperlib/HelperLibMath.hpp"
+#include "HelperLibMath.hpp"
 
 #ifdef _WIN32
 	#include <gl/gl.h>

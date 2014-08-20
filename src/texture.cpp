@@ -10,9 +10,9 @@
 
 #include "GlHeader.hpp"
 
-#include "Helperlib/Log.hpp"
+#include "Log.hpp"
 
-#include "Gl/Extensions.h"
+#include "Extensions.h"
 
 #include "hardware.hpp"
 #include "conf.h"

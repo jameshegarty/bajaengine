@@ -3,7 +3,7 @@
 
 #include "Types.hpp"
 #include "HelperLibString.hpp"
-#include "collision/collision.hpp"
+#include "collision.hpp"
 #include <iostream>
 #include "physics.h"
 #include "SceneGraph.hpp"

@@ -2,7 +2,7 @@
 
 #include "editor.h"
 #include "conf.h"
-#include "Helperlib/HelperLibMath.hpp"
+#include "HelperLibMath.hpp"
 #include "timeing.hpp"
 #include "os.h"
 #include "text.hpp"

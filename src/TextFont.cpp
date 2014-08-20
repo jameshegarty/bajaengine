@@ -1,5 +1,5 @@
 #include "Text.hpp"
-#include "Helperlib/Log.hpp"
+#include "Log.hpp"
 
 #include "conf.h"
 #include "Bmp.hpp"

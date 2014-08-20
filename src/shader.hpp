@@ -1,7 +1,7 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include "Helperlib/Containers.hpp"
+#include "Containers.hpp"
 
 #include "HelperLibString.hpp"
 
@@ -12,7 +12,7 @@ typedef int ShaderPackId;
 #define LANG_ASM 1
 #define LANG_GLSL 2
 
-#include "Gl/Extensions.h"
+#include "Extensions.h"
 
 #include "GlHeader.hpp"
 

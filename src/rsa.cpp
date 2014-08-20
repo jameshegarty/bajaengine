@@ -1,11 +1,11 @@
-#include "Helperlib/Containers.hpp"
+#include "Containers.hpp"
 
 #include "md5.h"
 #include "rsa.h"
 #include "random.h"
 
 
-#include "integer/integer.hpp"
+#include "integer.hpp"
 
 #include <iostream>
 #include <fstream>

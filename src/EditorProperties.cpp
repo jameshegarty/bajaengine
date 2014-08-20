@@ -8,7 +8,7 @@
 #include "mouse.h"
 #include "texturelibrary.h"
 #include "lightmap.h"
-#include "Helperlib/HelperLibMath.hpp"
+#include "HelperLibMath.hpp"
 #include "texture.hpp"
 #include "level.hpp"
 

@@ -3,7 +3,7 @@
 #include "Tga.hpp"
 #include "jpg.hpp"
 #include "script.hpp"
-#include "Helperlib/HelperLibMath.hpp"
+#include "HelperLibMath.hpp"
 #include "leaks.h"
 #include "level.hpp"
 

@@ -14,9 +14,9 @@
 #include "hardware.hpp"
 #include "random.h"
 
-#include "Helperlib/Log.hpp"
-#include "Helperlib/sort.hpp"
-#include "Helperlib/HelperLibMath.hpp"
+#include "Log.hpp"
+#include "sort.hpp"
+#include "HelperLibMath.hpp"
 
 #include "lightmap.h"
 #include "editor.h"

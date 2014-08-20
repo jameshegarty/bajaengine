@@ -6,8 +6,8 @@
 #include <iostream> 
 #include <fstream>
 
-#include "Helperlib/Log.hpp"
-#include "Helperlib/HelperLibMath.hpp"
+#include "Log.hpp"
+#include "HelperLibMath.hpp"
 
 #include "FileIo.hpp"
 #include "Bmp.hpp"

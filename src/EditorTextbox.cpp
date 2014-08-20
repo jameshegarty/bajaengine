@@ -2,7 +2,7 @@
 
 #include "EditorTextbox.h"
 #include "keyboard.h"
-#include "Helperlib/HelperLibMath.hpp"
+#include "HelperLibMath.hpp"
 #include "timeing.hpp"
 #include "text.hpp"
 

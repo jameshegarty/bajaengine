@@ -7,10 +7,10 @@
 #include "level.hpp"
 #include "draw.hpp"
 #include "timeing.hpp"
-#include "Helperlib/HelperLibMath.hpp"
+#include "HelperLibMath.hpp"
 #include "os.h"
 #include <fstream>
-#include "Helperlib/Log.hpp"
+#include "Log.hpp"
 
 String Editor::previousTool(String gui){
 	return editorToolPast[gui];

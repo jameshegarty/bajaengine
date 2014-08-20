@@ -1,8 +1,8 @@
 #include "Types.hpp"
 
 #include <iostream>
-#include "Helperlib/HelperLibMath.hpp"
-#include "collision/vectormath.hpp"
+#include "HelperLibMath.hpp"
+#include "vectormath.hpp"
 
 #include <math.h>
 

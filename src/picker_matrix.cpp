@@ -7,7 +7,7 @@
 #include "conf.h"
 
 #include "picker_matrix.h"
-#include "Helperlib/sort.hpp"
+#include "sort.hpp"
 
 GlPickerMatrix pickerMatrix;
 

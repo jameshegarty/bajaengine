@@ -15,7 +15,7 @@
 #include "picking.h"
 #include "timeing.hpp"
 
-#include "Helperlib/Log.hpp"
+#include "Log.hpp"
 
 
 int luaTextPanelScissor(lua_State *L){

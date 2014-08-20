@@ -6,7 +6,7 @@
 #include "timeing.hpp"
 #include "os.h"
 
-#include "Helperlib/Log.hpp"
+#include "Log.hpp"
 #include <Carbon/Carbon.h>
 
 #include "keyboard.h"

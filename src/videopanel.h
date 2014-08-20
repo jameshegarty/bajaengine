@@ -3,10 +3,10 @@
 
 #include "Types.hpp"
 #include "HelperLibString.hpp"
-#include "Helperlib/Containers.hpp"
+#include "Containers.hpp"
 #include "script.hpp"
 #include "shader.hpp"
-#include "video/Video.h"
+#include "Video.h"
 
 /*class Thumb{
 	public:

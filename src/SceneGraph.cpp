@@ -1,8 +1,8 @@
 #include "SceneGraph.hpp"
-#include "Helperlib/HelperLibMath.hpp"
+#include "HelperLibMath.hpp"
 #include "level.hpp"
 #include "instance.hpp"
-#include "Helperlib/sort.hpp"
+#include "sort.hpp"
 
 SceneGraph sceneGraph;
 

@@ -1,6 +1,6 @@
 #include "shader.hpp"
-#include "Gl/Extensions.h"
-#include "Helperlib/Log.hpp"
+#include "Extensions.h"
+#include "Log.hpp"
 #include "script.hpp"
 #include "hardware.hpp"
 #include "md5.h"

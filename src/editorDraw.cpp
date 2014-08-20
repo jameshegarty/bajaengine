@@ -2,8 +2,8 @@
 
 #include "editor.h"
 #include "level.hpp"
-#include "Helperlib/HelperLibMath.hpp"
-#include "Helperlib/Log.hpp"
+#include "HelperLibMath.hpp"
+#include "Log.hpp"
 
 #include "keyboard.h"
 #ifdef DEVELOPER
@@ -12,7 +12,7 @@
 #include "texturelibrary.h"
 #include "conf.h"
 #include "lightmap.h"
-#include "Audio/Audio.h"
+#include "Audio.h"
 #include "texture.hpp"
 #include "draw.hpp"
 #include "timeing.hpp"

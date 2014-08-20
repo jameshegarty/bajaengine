@@ -4,10 +4,10 @@
 #include <OpenGL/glu.h>
 #include <OpenGL/glext.h>
 #include <OpenGL/OpenGL.h>
-#include "../Engine.h"
+#include "Engine.h"
 #include <sys/stat.h>
 
-#include "../helperlib/log.hpp"
+#include "log.hpp"
 #include "HelperLibString.hpp"
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreFoundation/CFDictionary.h>

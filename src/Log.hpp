@@ -2,11 +2,11 @@
 #define HELPERLIB_LOG_H
 
 #include <string>
-#include "../HelperLibString.hpp"
+#include "HelperLibString.hpp"
 #include "StringFunctions.hpp"
 #include "Containers.hpp"
-#include "../Types.hpp"
-#include "../os.h"
+#include "Types.hpp"
+#include "os.h"
 
 //http://www.cplusplus.com/doc/tutorial/tut4-2.html
 

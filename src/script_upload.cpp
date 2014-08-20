@@ -10,7 +10,7 @@
 #include "conf.h"
 
 
-#include "Helperlib/Log.hpp"
+#include "Log.hpp"
 
 #include "Text.hpp"
 
@@ -22,7 +22,7 @@
 
 #include "shader.hpp"
 
-#include "Gl/Extensions.h"
+#include "Extensions.h"
 
 #include "script_upload.h"
 

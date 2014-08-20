@@ -1,5 +1,5 @@
 #include "video.h"
-#include "../HelperLib/log.hpp"
+#include "log.hpp"
 
 #ifdef _WIN32
 #include "../NeHeGl.h"

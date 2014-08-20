@@ -8,8 +8,8 @@
 //-----------------------------------------------------------------------------
 
 #include "vectormath.hpp"
-#include "../camera.hpp"
-#include "../level.hpp"
+#include "camera.hpp"
+#include "level.hpp"
 
 #define EPSILON 0.05f
 

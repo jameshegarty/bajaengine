@@ -2,7 +2,7 @@
 #define POLYGON_H 
 
 #include "script.hpp"
-#include "Helperlib/Containers.hpp"
+#include "Containers.hpp"
 #include "objects.hpp"
 
 class SceneGraphNode;

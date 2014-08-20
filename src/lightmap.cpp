@@ -4,10 +4,10 @@
 #include "lightmap.h"
 #include "bmp.hpp"
 #include "level.hpp"
-#include "Helperlib/HelperLibMath.hpp"
+#include "HelperLibMath.hpp"
 #include "texture.hpp"
 #include "conf.h"
-#include "collision/vectormath.hpp"
+#include "vectormath.hpp"
 #include "draw.hpp"
 
 Lightmap lightmap;

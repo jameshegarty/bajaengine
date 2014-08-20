@@ -1,5 +1,5 @@
 #include "disk.hpp"
-#include "Helperlib/HelperLibMath.hpp"
+#include "HelperLibMath.hpp"
 #include "GlHeader.hpp"
 
 

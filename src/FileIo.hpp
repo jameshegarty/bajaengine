@@ -3,7 +3,7 @@
 
 //#include "common.h"
 #include "HelperLibString.hpp"
-#include "Helperlib/StringFunctions.hpp"
+#include "StringFunctions.hpp"
 #include "script.hpp"
 #include "os.h"
 

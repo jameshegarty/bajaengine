@@ -1,4 +1,4 @@
-#include "../Helperlib/StringFunctions.hpp"
+#include "StringFunctions.hpp"
 
 #include <sstream>
 

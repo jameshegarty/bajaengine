@@ -16,9 +16,9 @@
 #include "timeing.hpp"
 
 #include "os.h"
-#include "Helperlib/HelperLibMath.hpp"
+#include "HelperLibMath.hpp"
 
-#include "Helperlib/Log.hpp"
+#include "Log.hpp"
 
 Map<Path,int> dupTex;
 Map<Path,int> panelTexRefs;

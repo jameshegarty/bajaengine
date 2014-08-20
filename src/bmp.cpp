@@ -3,9 +3,9 @@
 #include <math.h>			// Math Library Header File
 #include <stdio.h>			// Header File For Standard Input/Output
 
-#include "Helperlib/StringFunctions.hpp"
-#include "Helperlib/Log.hpp"
-#include "Helperlib/HelperLibMath.hpp"
+#include "StringFunctions.hpp"
+#include "Log.hpp"
+#include "HelperLibMath.hpp"
 #include "Bmp.hpp"
 
 #include "endian.hpp"

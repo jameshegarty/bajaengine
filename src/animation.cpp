@@ -4,7 +4,7 @@
 #include "script.hpp"
 #include "engine.h"
 #include "timeing.hpp"
-#include "Helperlib/HelperLibMath.hpp"
+#include "HelperLibMath.hpp"
 #include "SceneGraph.hpp"
 
 Animation animation;

@@ -1,9 +1,9 @@
 #include "hardware.hpp"
 #include "script.hpp"
 #include "os.h"
-#include "Helperlib/sort.hpp"
-#include "Helperlib/HelperLibMath.hpp"
-#include "Helperlib/Log.hpp"
+#include "sort.hpp"
+#include "HelperLibMath.hpp"
+#include "Log.hpp"
 #include "GlHeader.hpp"
 #include "conf.h"
 

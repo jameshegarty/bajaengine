@@ -1,20 +1,20 @@
-#include "../common.h"
-#include "../engine.h"
-#include "../Helperlib/HelperLibMath.hpp"
-#include "../Helperlib/Log.hpp"
-#include "../level.hpp"
+#include "common.h"
+#include "engine.h"
+#include "HelperLibMath.hpp"
+#include "Log.hpp"
+#include "level.hpp"
 #include "Audio.h"
-#include "../timeing.hpp"
-#include "../hardware.hpp"
+#include "timeing.hpp"
+#include "hardware.hpp"
 
 #include <al.h>
 #include <alc.h>
 
-#include "../script.hpp"
+#include "script.hpp"
 
-#include "../os.h"
+#include "os.h"
 
-#include "../GlHeader.hpp"
+#include "GlHeader.hpp"
 
 
 static int luaPlay(lua_State *L){

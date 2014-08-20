@@ -1,7 +1,7 @@
 #ifndef RSA_H
 #define RSA_H 1
 
-#include "integer/integer.hpp"
+#include "integer.hpp"
 #include <string>
 
 #define RSA_KEY_BYTES 64

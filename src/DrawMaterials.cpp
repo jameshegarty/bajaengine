@@ -8,7 +8,7 @@
 #include <GLUT/glut.h>
 #endif				
 											// Header File For The GLu32 Library
-#include "Gl/Extensions.h"
+#include "Extensions.h"
 #include "draw.hpp"
 #include "DrawDynamic.h"
 #include "level.hpp"
@@ -19,8 +19,8 @@
 #include "hardware.hpp"
 #include "random.h"
 
-#include "Helperlib/Log.hpp"
-#include "Helperlib/sort.hpp"
+#include "Log.hpp"
+#include "sort.hpp"
 
 
 #include <math.h>

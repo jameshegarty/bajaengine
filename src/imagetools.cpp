@@ -4,8 +4,8 @@
 #include "script.hpp"
 #include "shader.hpp"
 #include "conf.h"
-#include "Helperlib/HelperLibMath.hpp"
-#include "Helperlib/Log.hpp"
+#include "HelperLibMath.hpp"
+#include "Log.hpp"
 
 #include <math.h>
 
