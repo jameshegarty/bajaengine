@@ -128,7 +128,7 @@ void drawArrayQuick(Array<Object*>* objects){
 
 void drawArrayInner(Object* object,bool transform){
 	
-	assert(!transform);
+  //	assert(!transform);
 	
 	//workaround, due to having to adjust env map objects in nonstaticdraw
 #ifdef FEATURE_CUBIC_ENVIRONMENT_MAPS

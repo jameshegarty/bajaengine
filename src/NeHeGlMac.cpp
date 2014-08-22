@@ -27,6 +27,8 @@ extern "C"{
 #include "keyboard.h"
 #include "editor.h"
 
+#include "draw.hpp"
+
 int nativeY;
 #define MAC_HIDE_MOUSE 1
 int firstFrameHack=0;
@@ -49,6 +51,140 @@ int glutBit=0;
 
 void ChangeScreenResolution(int width, int height, int bitsPerPixel,bool fullscreen);
 
+#include <OVR.h>
+#include <OVR_CAPI_GL.h>
+
+bool rift = true;
+
+///ovrGLConfig cfg;
+//ovrRenderAPIConfig cfg;
+ovrGLTexture EyeTexture[2];
+ovrEyeRenderDesc EyeRenderDesc[2];
+ovrPosef            EyeRenderPose[2]; 
+ovrFovPort eyesFov[2];
+GLuint eyeTexBuffer[2];
+GLuint eyeTex[2];
+GLuint eyeDepth[2];
+ovrHmd              Hmd;
+ovrMatrix4f riftProjection[2];
+
+ovrRenderAPIConfig Get_ovrRenderAPIConfig()
+{
+  ovrRenderAPIConfig result = ovrRenderAPIConfig();
+  result.Header.API = ovrRenderAPI_OpenGL;
+  result.Header.RTSize = OVR::Sizei(1920, 1080);
+  result.Header.Multisample = 1;//Params.Multisample;
+  return result;
+}
+
+ovrSizei recommenedTex0Size;
+ovrSizei recommenedTex1Size;
+
+void riftInit(){
+
+  ovr_Initialize();
+
+  Hmd = ovrHmd_Create(0);
+
+  if (!Hmd)
+    {
+      // If we didn't detect an Hmd, create a simulated one for debugging.
+      Hmd = ovrHmd_CreateDebug(ovrHmd_DK2);
+      //      UsingDebugHmd = true;
+      if (!Hmd)
+        {   // Failed Hmd creation.
+          logs().main.write("could not create simulated HMD");
+          return;
+        }
+    }
+
+  if(!Hmd){
+    logs().main.write("Could not find HMD");
+  }else{
+    logs().main.write("Found HMD");
+  }
+
+  eyesFov[0] = Hmd->DefaultEyeFov[0];
+  eyesFov[1] = Hmd->DefaultEyeFov[1];
+
+  float DesiredPixelDensity = 1.f;
+
+  recommenedTex0Size = ovrHmd_GetFovTextureSize(Hmd, ovrEye_Left,  eyesFov[0], DesiredPixelDensity);
+  recommenedTex1Size = ovrHmd_GetFovTextureSize(Hmd, ovrEye_Right, eyesFov[1], DesiredPixelDensity);
+
+  //  conf->widescreen=false;
+  //  conf->sizeX = recommenedTex0Size.w;
+  //  conf->sizeY = recommenedTex0Size.h;
+
+  logs().main.write("size "+String(recommenedTex0Size.w)+" "+String(recommenedTex0Size.h));
+
+  //cfg.OGL.Header.API         = ovrRenderAPI_OpenGL;
+  //cfg.OGL.Header.RTSize      = OVR::Sizei(Hmd->Resolution.w, Hmd->Resolution.h);
+  //cfg.OGL.Header.Multisample = 1;
+  //cfg.OGL.Window             = window;
+  //cfg.OGL.DC                 = dc;
+
+   unsigned           distortionCaps = ovrDistortionCap_Chromatic | ovrDistortionCap_Vignette;
+
+   
+   ovrRenderAPIConfig config         = Get_ovrRenderAPIConfig();
+   //   cfg.Config = GetConfig();
+  ovrBool result = ovrHmd_ConfigureRendering(Hmd, &config, distortionCaps,
+                                             eyesFov, EyeRenderDesc);
+
+  logs().main.write("eye fov "+String(EyeRenderDesc[0].Fov.UpTan)+" "+String(EyeRenderDesc[0].Fov.DownTan));
+
+
+
+  if(!result){
+    logs().main.write("configure failed");
+  }
+
+  for(int eye=0; eye<2; eye++){
+    riftProjection[eye] = ovrMatrix4f_Projection( EyeRenderDesc[eye].Fov, 0.01f, 10000.f, true );
+
+    glGenFramebuffers(1, &(eyeTexBuffer[eye]));
+    glBindFramebuffer(GL_FRAMEBUFFER, eyeTexBuffer[eye]);
+    
+    glGenTextures(1, &(eyeTex[eye]));
+ 
+    // "Bind" the newly created texture : all future texture functions will modify this texture
+    glBindTexture(GL_TEXTURE_2D, eyeTex[eye]);
+    
+    // Give an empty image to OpenGL ( the last "0" )
+    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, recommenedTex0Size.w, recommenedTex0Size.h, 0,GL_RGB, GL_UNSIGNED_BYTE, 0);
+ 
+    // Poor filtering. Needed !
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    glGenRenderbuffers(1, &eyeDepth[eye]);
+    glBindRenderbuffer(GL_RENDERBUFFER, eyeDepth[eye]);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, recommenedTex0Size.w, recommenedTex0Size.h);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, eyeTex[eye], 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, eyeDepth[eye]);
+
+    //    GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+    //    glDrawBuffers(1, DrawBuffers);
+
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
+      logs().main.write("ERROR CREATING RENDER TEXTURE");
+    }
+
+    OVR::Sizei RenderTargetSize(recommenedTex0Size.w, recommenedTex0Size.h);
+
+    EyeTexture[eye].OGL.Header.API            = ovrRenderAPI_OpenGL;
+    EyeTexture[eye].OGL.Header.TextureSize    = RenderTargetSize;
+    EyeTexture[eye].OGL.Header.RenderViewport = OVR::Recti(RenderTargetSize);
+    EyeTexture[eye].OGL.TexId                 = eyeTex[eye];
+
+  }
+
+  ovrHmd_DismissHSWDisplay(Hmd);
+
+}
+
 void Display(void){
 	if(firstFrameHack==4){
 		ChangeScreenResolution(conf->sizeXTEMP,conf->sizeYTEMP,conf->bitDepthTEMP,!conf->windowedTEMP);
@@ -58,10 +194,36 @@ void Display(void){
 	}
 	
 	update();
-	
-	Draw ();
 
-	glutSwapBuffers();
+  if(rift){
+    ovrFrameTiming hmdFrameTiming = ovrHmd_BeginFrame(Hmd, 0);
+    for(int eye=0; eye<2; eye++){
+
+    printf("DO E %d\n",eye);
+
+    level->camera->eye = eye;
+
+      glBindFramebuffer(GL_FRAMEBUFFER, eyeTexBuffer[eye]);
+      glViewport(0,0,recommenedTex0Size.w,recommenedTex0Size.h);
+
+		glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glEnable(GL_DEPTH_TEST);
+
+
+      		level->camera->adjust();
+      		level->camera->move();
+                drawLevel();
+                drawPanels();
+                drawMouse();
+                //    Draw ();
+      }
+
+      ovrHmd_EndFrame(Hmd, EyeRenderPose, (ovrTexture*)EyeTexture);
+  //	glutSwapBuffers();
+  }else{
+    Draw ();
+glutSwapBuffers();
+  }
 }
 
 void Animate(void){
@@ -522,7 +684,8 @@ int main(int argc, char **argv){
 			
 			
 	glutInit(&argc, argv);
-	
+
+
 	if (argc > 1 && !strcmp(argv[1], "-w")){
 		fullscreen = GL_FALSE;
 	}
@@ -604,7 +767,8 @@ int main(int argc, char **argv){
 	glutSetCursor( GLUT_CURSOR_NONE);
 	#endif
 	
-	
+
+  if(rift){  	riftInit();	}
 	glutPostRedisplay();
     glutMainLoop();
 	

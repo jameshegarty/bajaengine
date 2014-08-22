@@ -46,8 +46,11 @@ void Camera::projectionMatrix(){
 	}
 
 
+
 }
 
+#include <OVR.h>
+extern ovrMatrix4f riftProjection[2];
 
 void Camera::adjust(){
 
@@ -69,13 +72,13 @@ void Camera::adjust(){
 			px=(conf->sizeX-sx)/(float)2;
 		}
 
-		glViewport (px, (GLsizei)(py), (GLsizei)(sx), (GLsizei)(sy));				// Reset The Current Viewport (x,y,width,height)
+    //		glViewport (px, (GLsizei)(py), (GLsizei)(sx), (GLsizei)(sy));				// Reset The Current Viewport (x,y,width,height)
 	}else{
 
-		glViewport (level->viewportPos.x*conf->sizeX, 
-					-level->viewportPos.y*conf->sizeY, 
-					(GLsizei)(conf->sizeX*level->viewportScale.x), 
-					(GLsizei)(conf->sizeY*level->viewportScale.y));
+    //		glViewport (level->viewportPos.x*conf->sizeX, 
+    //					-level->viewportPos.y*conf->sizeY, 
+    //					(GLsizei)(conf->sizeX*level->viewportScale.x), 
+    //					(GLsizei)(conf->sizeY*level->viewportScale.y));
 
 	}
 
@@ -95,13 +98,23 @@ void Camera::adjust(){
 		}
 	}else{
 		if(conf->widescreen){
-			gluPerspective (fov, conf->widescreenRatio,clipNear,clipFar);		
+      //glLoadMatrixf((float*)riftProjection[eye].M);
+            			gluPerspective (fov, conf->widescreenRatio,clipNear,clipFar);		
+      //      printf("HERE\n");
 		}else{
 
 			gluPerspective (fov, (float)(conf->sizeX)/(float)(conf->sizeY),clipNear,clipFar);
 		}
 	}
+    /*
+    if(eye==0){
+            glTranslatef(1.f,0.f,0.f);
+            printf("E1\n");
+                  }else{
+            glTranslatef(-1.f,0.f,0.f);
+            printf("E2\n");
 
+            }*/
 					
 	glMatrixMode (GL_MODELVIEW);										// Select The Modelview Matrix
 	glLoadIdentity ();		
@@ -300,10 +313,10 @@ void Camera::viewport(){
 			px=(conf->sizeX-sx)/(float)2;
 		}
 
-		glViewport (px, (GLsizei)(py), (GLsizei)(sx), (GLsizei)(sy));				// Reset The Current Viewport (x,y,width,height)
+    //		glViewport (px, (GLsizei)(py), (GLsizei)(sx), (GLsizei)(sy));				// Reset The Current Viewport (x,y,width,height)
 	}else{
 
-		glViewport (0, 0, (GLsizei)(conf->sizeX), (GLsizei)(conf->sizeY));
+    //		glViewport (0, 0, (GLsizei)(conf->sizeX), (GLsizei)(conf->sizeY));
 
 	}
 }

@@ -30,6 +30,7 @@ class Camera{
 
 		unsigned int sceneGraphLevel;
 
+  int eye;
 		float speed;
 
 		DoubleVector3d pos;
