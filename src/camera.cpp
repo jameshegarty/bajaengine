@@ -22,6 +22,9 @@
 
 #include <math.h>
 
+#include <OVR.h>
+extern ovrMatrix4f riftProjection[2];
+using namespace OVR;
 
 void Camera::projectionMatrix(){
 
@@ -39,7 +42,8 @@ void Camera::projectionMatrix(){
 		}
 	}else{
 		if(conf->widescreen){
-			gluPerspective (fov, conf->widescreenRatio,clipNear,clipFar);		
+      //			gluPerspective (fov, conf->widescreenRatio,clipNear,clipFar);		
+            glLoadTransposeMatrixf((float*)riftProjection[eye].M);
 		}else{
 			gluPerspective (fov, (float)(conf->sizeX)/(float)(conf->sizeY),clipNear,clipFar);	
 		}
@@ -48,9 +52,6 @@ void Camera::projectionMatrix(){
 
 
 }
-
-#include <OVR.h>
-extern ovrMatrix4f riftProjection[2];
 
 void Camera::adjust(){
 
@@ -98,28 +99,37 @@ void Camera::adjust(){
 		}
 	}else{
 		if(conf->widescreen){
-      //glLoadMatrixf((float*)riftProjection[eye].M);
-            			gluPerspective (fov, conf->widescreenRatio,clipNear,clipFar);		
+      /*float M[4][4];
+      for(int i=0; i<4; i++){
+        for(int j=0; j<4; j++){
+          M[i][j] = riftProjection[eye].M[j][i];
+        }
+        }*/
+            glLoadTransposeMatrixf((float*)riftProjection[eye].M);
+      //      glLoadMatrixf((float*)M);
+      //            			gluPerspective (fov, conf->widescreenRatio,clipNear,clipFar);		
       //      printf("HERE\n");
 		}else{
 
 			gluPerspective (fov, (float)(conf->sizeX)/(float)(conf->sizeY),clipNear,clipFar);
 		}
 	}
-    /*
+    
+  float d =0.5;
     if(eye==0){
-            glTranslatef(1.f,0.f,0.f);
+            glTranslatef(d,0.f,0.f);
             printf("E1\n");
                   }else{
-            glTranslatef(-1.f,0.f,0.f);
+            glTranslatef(-d,0.f,0.f);
             printf("E2\n");
 
-            }*/
+            }
 					
 	glMatrixMode (GL_MODELVIEW);										// Select The Modelview Matrix
 	glLoadIdentity ();		
 
 }
+extern ovrPosef            EyeRenderPose[2]; 
 
 void Camera::move(){
 	float changeZ=0;
@@ -234,11 +244,27 @@ void Camera::move(){
 	}
 
 	glLoadIdentity();
-	glRotatef(-rot.x,	1.0f,	0,	0);
-	glRotatef(-rot.y,	0,	1.0f,	0);
-	glRotatef(-rot.z,	0,	0.0f,	1.0f);
+  
+  OVR::Posef pose = EyeRenderPose[eye];
+  float yaw;
+  float eyePitch;
+  float eyeRoll;
+  pose.Rotation.GetEulerAngles<OVR::Axis_Y, OVR::Axis_X, OVR::Axis_Z>(&yaw, &eyePitch, &eyeRoll);
+
+  //
+  //
+  glRotatef(-rot.z-eyeRoll*57.29f,	0,	0.0f,	1.0f);
+  glRotatef(-rot.x-eyePitch*57.29f,	1.0f,	0,	0);
+  glRotatef(-rot.y-yaw*57.29f,	0,	1.0f,	0);
+
+  //	glRotatef(-eyeRoll*57.29f,	0,	0.0f,	1.0f);
+  //  glRotatef(-eyePitch*57.29f,	1.0f,	0,	0);
+  //  glRotatef(-yaw*57.29f,	0,	1.0f,	0);
 	
-	glTranslatef(-pos.x, -pos.y, -pos.z);
+  glTranslatef(-pos.x, -pos.y, -pos.z);
+  float rScale = 2.f;
+	//glTranslatef(-pos.x-rScale*EyeRenderPose[eye].Position.x, -pos.y-rScale*EyeRenderPose[eye].Position.y, -pos.z-rScale*EyeRenderPose[eye].Position.z);
+  
 }
 
 void Camera::transform(){

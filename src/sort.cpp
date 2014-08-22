@@ -1,4 +1,5 @@
 #include "sort.hpp"
+#include <assert.h>
 
 Sort sort;
 
@@ -58,6 +59,9 @@ int Sort::partition(SortItem y[], int f, int l) {
     up = f;
     down = l;
     do { 
+      // check for nan
+      assert(y[up].value==y[up].value);
+      assert(y[down].value==y[down].value);
         while (y[up].value <= piv.value && up < l) {
             up++;
         }
@@ -65,6 +69,8 @@ int Sort::partition(SortItem y[], int f, int l) {
             down--;
         }
         if (up < down ) {
+          assert(up >= f && up <= l);
+          assert(down >= f && down <= l);
             temp = y[up];
             y[up] = y[down];
             y[down] = temp;

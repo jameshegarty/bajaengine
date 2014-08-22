@@ -67,6 +67,7 @@ GLuint eyeTex[2];
 GLuint eyeDepth[2];
 ovrHmd              Hmd;
 ovrMatrix4f riftProjection[2];
+//ovrPosef            EyeRenderPose[2];
 
 ovrRenderAPIConfig Get_ovrRenderAPIConfig()
 {
@@ -134,7 +135,13 @@ void riftInit(){
 
   logs().main.write("eye fov "+String(EyeRenderDesc[0].Fov.UpTan)+" "+String(EyeRenderDesc[0].Fov.DownTan));
 
+  ovrHmd_ConfigureTracking(Hmd, ovrTrackingCap_Orientation |
+                           ovrTrackingCap_MagYawCorrection |
+                           ovrTrackingCap_Position, 0);
 
+  if(!(ovrHmd_GetTrackingState(Hmd, 0.0f).StatusFlags)){
+      logs().main.write("no tracking");
+    }
 
   if(!result){
     logs().main.write("configure failed");
@@ -199,6 +206,9 @@ void Display(void){
     ovrFrameTiming hmdFrameTiming = ovrHmd_BeginFrame(Hmd, 0);
     for(int eye=0; eye<2; eye++){
 
+      ovrEyeType eyet = Hmd->EyeRenderOrder[eye];
+      EyeRenderPose[eye] = ovrHmd_GetEyePose(Hmd, eyet);
+
     printf("DO E %d\n",eye);
 
     level->camera->eye = eye;
@@ -209,13 +219,20 @@ void Display(void){
 		glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glEnable(GL_DEPTH_TEST);
 
-
+      
       		level->camera->adjust();
       		level->camera->move();
                 drawLevel();
+                //				drawWaterBad();
+        //			drawTransparent(0,true,true);
+      //drawTransparent(level->water->pos.y,true,false);
+
                 drawPanels();
                 drawMouse();
-                //    Draw ();
+      
+		console().draw();
+
+      //                    Draw ();
       }
 
       ovrHmd_EndFrame(Hmd, EyeRenderPose, (ovrTexture*)EyeTexture);

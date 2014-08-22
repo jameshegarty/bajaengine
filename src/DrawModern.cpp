@@ -345,7 +345,9 @@ void drawModern(){
 				
 				if(level->objects[i]->listBuilt && frustrum){
 					dist=center-level->camera->pos;
-					items.pushBack(SortItem(i,math.dotProduct(dist,dist)));
+          float sivalue = math.dotProduct(dist,dist);
+          assert(sivalue==sivalue); // Nan
+					items.pushBack(SortItem(i,sivalue));
 				}
 			}
 		}
