@@ -11,7 +11,7 @@
 #include "camera.hpp"
 #include "level.hpp"
 
-#define EPSILON 0.05f
+#define EPSILON 0.0001f
 
 
 //-----------------------------------------------------------------------------

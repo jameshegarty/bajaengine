@@ -52,6 +52,43 @@ void Camera::projectionMatrix(){
 
 
 }
+const Vector3f RightVector(1.0f, 0.0f, 0.0f);
+const Vector3f UpVector(0.0f, 1.0f, 0.0f);
+const Vector3f ForwardVector(0.0f, 0.0f, -1.0f); // -1 because HMD looks along -Z at identity orientation
+
+Posef VirtualWorldTransformfromRealPose(const Posef &sensorHeadPose)
+{
+  //  Quatf baseQ = Quatf(Vector3f(0,1,0), BodyYaw.Get());
+  Quatf baseQ = Quatf(Vector3f(0,1,0), level->camera->rot.y/57.29f);
+
+  //  return Posef(baseQ * sensorHeadPose.Rotation,
+  //               BodyPos + baseQ.Rotate(sensorHeadPose.Translation));
+
+  return Posef(baseQ * sensorHeadPose.Rotation,
+               Vector3f(level->camera->pos.x,level->camera->pos.y, level->camera->pos.z) + baseQ.Rotate(sensorHeadPose.Translation));
+}
+
+Matrix4f CalculateViewFromPose(const Posef& pose)
+{
+  Posef worldPose = VirtualWorldTransformfromRealPose(pose);
+
+  // Rotate and position View Camera
+  Vector3f up      = worldPose.Rotation.Rotate(UpVector);
+  Vector3f forward = worldPose.Rotation.Rotate(ForwardVector);
+
+  // Transform the position of the center eye in the real world (i.e. sitting in your chair)
+  // into the frame of the player's virtual body.
+
+  // It is important to have head movement in scale with IPD.
+  // If you shrink one, you should also shrink the other.
+  // So with zero IPD (i.e. everything at infinity),
+  // head movement should also be zero.
+  //  Vector3f viewPos = ForceZeroHeadMovement ? ThePlayer.BodyPos : worldPose.Translation;
+  Vector3f viewPos = worldPose.Translation;
+
+  Matrix4f view = Matrix4f::LookAtRH(viewPos, viewPos + forward, up);
+  return view;
+}
 
 void Camera::adjust(){
 
@@ -115,7 +152,7 @@ void Camera::adjust(){
 		}
 	}
     
-  float d =0.5;
+  /*  float d =0.5;
     if(eye==0){
             glTranslatef(d,0.f,0.f);
             printf("E1\n");
@@ -123,7 +160,7 @@ void Camera::adjust(){
             glTranslatef(-d,0.f,0.f);
             printf("E2\n");
 
-            }
+            }*/
 					
 	glMatrixMode (GL_MODELVIEW);										// Select The Modelview Matrix
 	glLoadIdentity ();		
@@ -244,12 +281,16 @@ void Camera::move(){
 	}
 
 	glLoadIdentity();
-  
+
+  /*  
   OVR::Posef pose = EyeRenderPose[eye];
   float yaw;
   float eyePitch;
   float eyeRoll;
   pose.Rotation.GetEulerAngles<OVR::Axis_Y, OVR::Axis_X, OVR::Axis_Z>(&yaw, &eyePitch, &eyeRoll);
+
+  float rScale = 20.f;
+  glTranslatef(-rScale*EyeRenderPose[eye].Position.x, -rScale*EyeRenderPose[eye].Position.y, -rScale*EyeRenderPose[eye].Position.z);
 
   //
   //
@@ -262,9 +303,12 @@ void Camera::move(){
   //  glRotatef(-yaw*57.29f,	0,	1.0f,	0);
 	
   glTranslatef(-pos.x, -pos.y, -pos.z);
-  float rScale = 2.f;
+  */
+
 	//glTranslatef(-pos.x-rScale*EyeRenderPose[eye].Position.x, -pos.y-rScale*EyeRenderPose[eye].Position.y, -pos.z-rScale*EyeRenderPose[eye].Position.z);
-  
+
+  Matrix4f view = CalculateViewFromPose(EyeRenderPose[eye]);
+  glLoadTransposeMatrixf((float*)view.M);
 }
 
 void Camera::transform(){

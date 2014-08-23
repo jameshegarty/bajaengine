@@ -345,6 +345,9 @@ void drawModern(){
 				
 				if(level->objects[i]->listBuilt && frustrum){
 					dist=center-level->camera->pos;
+          assert(level->camera->pos.x==level->camera->pos.x);
+          assert(level->camera->pos.y==level->camera->pos.y);
+          assert(level->camera->pos.z==level->camera->pos.z);
           float sivalue = math.dotProduct(dist,dist);
           assert(sivalue==sivalue); // Nan
 					items.pushBack(SortItem(i,sivalue));

@@ -40,13 +40,14 @@ String trackedResult;
 
 void ScriptConsole::draw(){
 
-	if(keyboard.tab_up){
+	if(keyboard.tab_up && level->camera->eye==0){
 		visible=!visible;
 	}
 
 	if(visible){
 
 		static int cursorOffset=0;
+
 
 		if(keyboard.current_letter_down=='p'  && keyboard.ctrl){
 			if(conf->pause){
@@ -88,14 +89,16 @@ void ScriptConsole::draw(){
 			String("picking2d: ")+engineTime.getTimer("picking2d")+"\t["+engineTime.getTimerAvg("picking2d")+"] ["+engineTime.getTimerPercent("picking2d")+"%]\n"+
 			String("Lua Memory Usage: ")+String(luaMemMegs)+"MB\n";
 
-		glColor4f(0,0,0,0.25);
-		text.draw2d(7,-7,debug);
+		//glColor4f(0,0,0,0.25);
+		//text.draw2d(200+2,-7,debug);
 
+        float riftX = 400.f;
 		glColor4f(1,1,1,0.9);
-		text.draw2d(5,-5,debug);
+		text.draw2d(riftX,-5,debug);
 		
 		static float cursorTick=0;
 
+        if(level->camera->eye==0){      
 		if(keyboard.enter_down){ 
 			writeUser(currentCommand);
 
@@ -174,6 +177,7 @@ void ScriptConsole::draw(){
 				}
 			}
 		}
+}
 
 		String cc="> "+currentCommand;
 
@@ -181,11 +185,11 @@ void ScriptConsole::draw(){
 		float y=-conf->sizeY+size.y+5;
 
 		//shadow lol
-		glColor4f(0,0,0,0.25);
-		text.draw2d(7,y-2,cc);
+		//glColor4f(0,0,0,0.25);
+		//text.draw2d(riftX+2,y-2+100,cc);
 
 		glColor4f(1,1,1,0.9);
-		text.draw2d(5,y,cc);
+		text.draw2d(riftX,y+100,cc);
 
 		int eTargetSize=40;
 		int endsize=0;
@@ -220,17 +224,17 @@ void ScriptConsole::draw(){
 
 			if(store[i].type==0){
 				//shadow lol
-				glColor4f(0,0,0,0.25);
-				text.draw2d(7,y-3,"> "+store[i].message);
+				//glColor4f(0,0,0,0.25);
+				//text.draw2d(riftX+2,y-3+100,"> "+store[i].message);
 
 				glColor4f(0.9,0.9,0.9,0.9);
-				text.draw2d(5,y,"> "+store[i].message);
+				text.draw2d(riftX,y+100,"> "+store[i].message);
 			}else{
-				glColor4f(0,0,0,0.25);
-				text.draw2d(7,y-3,store[i].message);
+				//glColor4f(0,0,0,0.25);
+				//text.draw2d(riftX+2,y-3+100,store[i].message);
 	
 				glColor4f(0.9,0.0,0.0,0.9);
-				text.draw2d(5,y,store[i].message);
+				text.draw2d(riftX,y+100,store[i].message);
 			}
 
 		}
