@@ -50,6 +50,14 @@ void Camera::projectionMatrix(){
 	}
 
 
+    if(eye==0){
+            glTranslatef(conf->riftIpd,0.f,0.f);
+            //            printf("E1\n");
+                  }else{
+      glTranslatef(-conf->riftIpd,0.f,0.f);
+            //            printf("E2\n");
+
+            }
 
 }
 const Vector3f RightVector(1.0f, 0.0f, 0.0f);
@@ -65,7 +73,7 @@ Posef VirtualWorldTransformfromRealPose(const Posef &sensorHeadPose)
   //               BodyPos + baseQ.Rotate(sensorHeadPose.Translation));
 
   return Posef(baseQ * sensorHeadPose.Rotation,
-               Vector3f(level->camera->pos.x,level->camera->pos.y, level->camera->pos.z) + baseQ.Rotate(sensorHeadPose.Translation));
+               Vector3f(level->camera->pos.x,level->camera->pos.y, level->camera->pos.z) + baseQ.Rotate(sensorHeadPose.Translation*conf->riftScale));
 }
 
 Matrix4f CalculateViewFromPose(const Posef& pose)
@@ -152,15 +160,15 @@ void Camera::adjust(){
 		}
 	}
     
-  /*  float d =0.5;
+  //float d =0.5;
     if(eye==0){
-            glTranslatef(d,0.f,0.f);
-            printf("E1\n");
+            glTranslatef(conf->riftIpd,0.f,0.f);
+            //            printf("E1\n");
                   }else{
-            glTranslatef(-d,0.f,0.f);
-            printf("E2\n");
+      glTranslatef(-conf->riftIpd,0.f,0.f);
+            //            printf("E2\n");
 
-            }*/
+            }
 					
 	glMatrixMode (GL_MODELVIEW);										// Select The Modelview Matrix
 	glLoadIdentity ();		
@@ -239,8 +247,16 @@ void Camera::move(){
 	}
 	#endif
 
-	newPos.x += (float) sin((-rot.y) * PI/180 ) * changeZ;
-    newPos.z -= (float) cos((-rot.y) * PI/180 ) * changeZ;
+  OVR::Posef pose = EyeRenderPose[eye];
+  float yaw;
+  float eyePitch;
+  float eyeRoll;
+  pose.Rotation.GetEulerAngles<OVR::Axis_Y, OVR::Axis_X, OVR::Axis_Z>(&yaw, &eyePitch, &eyeRoll);
+  //printf("%f\n",yaw);
+
+  float effRotY = -rot.y - yaw*57.29f;
+	newPos.x += (float) sin((effRotY) * PI/180 ) * changeZ;
+    newPos.z -= (float) cos((effRotY) * PI/180 ) * changeZ;
 
 
 	if(keyboard.comma){
@@ -309,14 +325,21 @@ void Camera::move(){
 
   Matrix4f view = CalculateViewFromPose(EyeRenderPose[eye]);
   glLoadTransposeMatrixf((float*)view.M);
+
+  //  glScalef(0.5f,0.5f,0.5f);
 }
 
 void Camera::transform(){
-	glRotatef(-rot.x,	1.0f,	0,	0);
-	glRotatef(-rot.y,	0.0f,	1.0f,	0);
-	glRotatef(-rot.z,	0.0f,	0.0f,	1.0f);
+	glLoadIdentity();
+
+  Matrix4f view = CalculateViewFromPose(EyeRenderPose[eye]);
+  glLoadTransposeMatrixf((float*)view.M);
+
+  //	glRotatef(-rot.x,	1.0f,	0,	0);
+  //	glRotatef(-rot.y,	0.0f,	1.0f,	0);
+  //	glRotatef(-rot.z,	0.0f,	0.0f,	1.0f);
 	
-	glTranslatef(-pos.x, -pos.y, -pos.z);
+  //	glTranslatef(-pos.x, -pos.y, -pos.z);
 }
 
 void Camera::reverseTransform(){

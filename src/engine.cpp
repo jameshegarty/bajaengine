@@ -279,7 +279,9 @@ bool Engine::init(){
 
 			script().add("draw",&conf->pickerDraw,p);
 			script().add("on",&conf->pickerOn,p);
-			
-		
+
+		LuaType* rift=script().add("rift",lluaa);			
+      script().add("ipd",&conf->riftIpd,rift);
+      script().add("scale",&conf->riftScale,rift);
 	return true;
 }

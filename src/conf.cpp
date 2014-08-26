@@ -140,6 +140,9 @@ Conf::Conf(){
 	#endif
 
 	frustumDebug=false;
+
+  riftIpd = 0.5f;
+  riftScale = 20.f;
 }
 
 bool Conf::load(){

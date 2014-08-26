@@ -188,10 +188,10 @@ void Mouse::hide(){
 }
 
 int luaMouseLoad(lua_State *L){
-	String file=luaL_checkstring(L,1);
+	String file = luaL_checkstring(L,1);
 
 	
-	int g=texture.load(os().workingDirectory+file);
+	int g=texture.load(file);
 
 	if(g!=-1){
 		mouse.textureId=g;

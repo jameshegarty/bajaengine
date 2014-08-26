@@ -399,7 +399,7 @@ bool Panel::load(Path file,int type=0){
 					assigned=true;
 					return true;
 				}else{
-					console().write("Error 1 loading file '"+file.getRelative()+"', "+im.error);
+					console().write("Error 1 loading file '"+file.getAbsolute()+"', "+im.error);
 					return false;
 				}
 			}
@@ -433,7 +433,7 @@ bool Panel::load(Path file,int type=0){
 					assignedMouseover=true;
 					return true;
 				}else{
-					console().write("Error 3 loading file '"+file.getRelative()+"', "+im.error);
+					console().write("Error 3 loading file '"+file.getAbsolute()+"', "+im.error);
 					return false;
 				}
 			}
@@ -508,7 +508,7 @@ bool Panel::load(Path file,int type=0){
 		return true;
 	}
 
-	console().write("Error 2 loading file '"+file.getRelative()+"', "+im.error);
+	console().write("Error 2 loading file '"+file.getAbsolute()+"', "+im.error);
 	return false;
 }
 

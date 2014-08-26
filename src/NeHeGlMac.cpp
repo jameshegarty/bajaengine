@@ -148,7 +148,7 @@ void riftInit(){
   }
 
   for(int eye=0; eye<2; eye++){
-    riftProjection[eye] = ovrMatrix4f_Projection( EyeRenderDesc[eye].Fov, 0.01f, 10000.f, true );
+    riftProjection[eye] = ovrMatrix4f_Projection( EyeRenderDesc[eye].Fov, 0.01f, 1000.f, true );
 
     glGenFramebuffers(1, &(eyeTexBuffer[eye]));
     glBindFramebuffer(GL_FRAMEBUFFER, eyeTexBuffer[eye]);
@@ -223,11 +223,11 @@ void Display(void){
       		level->camera->adjust();
       		level->camera->move();
                 drawLevel();
-                //				drawWaterBad();
+                				drawWaterBad();
         //			drawTransparent(0,true,true);
       //drawTransparent(level->water->pos.y,true,false);
 
-                drawPanels();
+                                drawPanels();
                 drawMouse();
       
 		console().draw();

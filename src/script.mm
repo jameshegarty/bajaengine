@@ -188,8 +188,10 @@ void ScriptConsole::draw(){
 		//glColor4f(0,0,0,0.25);
 		//text.draw2d(riftX+2,y-2+100,cc);
 
+        float riftY = 450.f;
+
 		glColor4f(1,1,1,0.9);
-		text.draw2d(riftX,y+100,cc);
+		text.draw2d(riftX,y+riftY,cc);
 
 		int eTargetSize=40;
 		int endsize=0;
@@ -228,13 +230,13 @@ void ScriptConsole::draw(){
 				//text.draw2d(riftX+2,y-3+100,"> "+store[i].message);
 
 				glColor4f(0.9,0.9,0.9,0.9);
-				text.draw2d(riftX,y+100,"> "+store[i].message);
+				text.draw2d(riftX,y+riftY,"> "+store[i].message);
 			}else{
 				//glColor4f(0,0,0,0.25);
 				//text.draw2d(riftX+2,y-3+100,store[i].message);
 	
 				glColor4f(0.9,0.0,0.0,0.9);
-				text.draw2d(riftX,y+100,store[i].message);
+				text.draw2d(riftX,y+riftY,store[i].message);
 			}
 
 		}

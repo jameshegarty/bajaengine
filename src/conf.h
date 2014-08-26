@@ -127,6 +127,10 @@ private:
 		bool loadProgressive;
 
 		int textureLevel;	//resize to find crappy cards, 0=textures are regular size, 1= half, 2=quarter
+
+    float riftIpd;
+    float riftScale;
+
 		Conf();
 		bool load();
 		bool save();
