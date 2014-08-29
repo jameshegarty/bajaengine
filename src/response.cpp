@@ -1,18 +1,19 @@
 //-----------------------------------------------------------------------------
-// File: Response.cpp
-//
-// Desc: Implementation of the collision response
-//
-// Copyright (c) 2000 Telemachos of Peroxide
-// www.peroxide.dk
+// based on "Improving the Numerical Robustness of Sphere Swept Collision Detection" 
+// by Jeff Linahan
+// and
+// "Improved Collision Detection and Response"
+// by Kasper Fauerby
 //-----------------------------------------------------------------------------
 
 #include "vectormath.hpp"
 #include "camera.hpp"
 #include "level.hpp"
 
-#define EPSILON 0.05f
+// this collision method relies on this being small. If you make it large, you will get jittering
+#define EPSILON 0.001f
 
+const bool COLLISION_PRINTF = false;
 
 //-----------------------------------------------------------------------------
 // Name: GetPosition()
@@ -21,7 +22,7 @@
 //-----------------------------------------------------------------------------
 DoubleVector3d Camera::GetPosition(DoubleVector3d position, DoubleVector3d velocity) {
 
-  printf("GetPosition %f %f %f, %f %f %f\n",position.x,position.y,position.z, velocity.x, velocity.y, velocity.z);
+  if(COLLISION_PRINTF){printf("GetPosition %f %f %f, %f %f %f\n",position.x,position.y,position.z, velocity.x, velocity.y, velocity.z);}
 
 	collided=false;
 
@@ -53,7 +54,7 @@ DoubleVector3d Camera::GetPosition(DoubleVector3d position, DoubleVector3d veloc
 //       one who actually calls the collision check on the meshes
 //-----------------------------------------------------------------------------
 DoubleVector3d Camera::collideWithWorld(DoubleVector3d pos, DoubleVector3d velocity) {
-  printf("collide with world pos %f %f %f, vmag %f, %f %f %f\n",pos.x, pos.y, pos.z, velocity.magnitude(),velocity.x, velocity.y, velocity.z);
+  if(COLLISION_PRINTF){printf("collide with world pos %f %f %f, vmag %f, %f %f %f\n",pos.x, pos.y, pos.z, velocity.magnitude(),velocity.x, velocity.y, velocity.z);}
  
  
   DoubleVector3d dest = pos + velocity;
@@ -62,8 +63,10 @@ DoubleVector3d Camera::collideWithWorld(DoubleVector3d pos, DoubleVector3d veloc
   DoubleVector3d first_plane_n;
 
   for(int i=0; i<3; i++){
-    printf("round %d pos %f %f %f vel %f %f %f\n",i,pos.x,pos.y,pos.z,velocity.x,velocity.y,velocity.z);
-    printf("dest %f %f %f\n",dest.x,dest.y,dest.z);
+    if(COLLISION_PRINTF){
+      printf("round %d pos %f %f %f vel %f %f %f\n",i,pos.x,pos.y,pos.z,velocity.x,velocity.y,velocity.z);
+      printf("\tdest %f %f %f\n",dest.x,dest.y,dest.z);
+    }
 
     // reset the collision package we send to the mesh 
     collision.velocity = velocity;
@@ -82,14 +85,15 @@ DoubleVector3d Camera::collideWithWorld(DoubleVector3d pos, DoubleVector3d veloc
     // check return value here, and possibly call recursively 	
     
     if (collision.foundCollision == false){ 
+      if(COLLISION_PRINTF){printf("no collision, return %f %f %f\n",dest.x, dest.y, dest.z);}
       return dest;
     }
    
 		// If we are stuck, we just back up to last safe position
     
 		if (collision.stuck) {
-      printf("return last safe %f %f %f\n",collision.lastSafePosition.x, collision.lastSafePosition.y, collision.lastSafePosition.z);
-			return collision.lastSafePosition;
+      if(COLLISION_PRINTF){printf("return last safe %f %f %f\n",collision.lastSafePosition.x, collision.lastSafePosition.y, collision.lastSafePosition.z);}
+      //			return collision.lastSafePosition;
 		}else{
       collision.lastSafePosition = pos;
     }
@@ -105,14 +109,21 @@ DoubleVector3d Camera::collideWithWorld(DoubleVector3d pos, DoubleVector3d veloc
 
       first_plane_p = collision.nearestPolygonIntersectionPoint;
       first_plane_n = touchPoint - collision.nearestPolygonIntersectionPoint;
-      printf("plane %f %f %f n %f %f %f\n",first_plane_p.x,first_plane_p.y,first_plane_p.z, first_plane_n.x,first_plane_n.y,first_plane_n.z);
 
-      dest -= (plane_dist(first_plane_p, first_plane_n, dest) - long_radius) * first_plane_n; // project onto plane
+      if(COLLISION_PRINTF){printf("\tplane %f %f %f n %f %f %f\n",first_plane_p.x,first_plane_p.y,first_plane_p.z, first_plane_n.x,first_plane_n.y,first_plane_n.z);}
+
+      double pdist = plane_dist(first_plane_p, first_plane_n, dest);
+      if(COLLISION_PRINTF){printf("\tpdist %f\n",pdist);}
+      dest -= (pdist - long_radius) * first_plane_n; // project onto plane
+      if(COLLISION_PRINTF){printf("\tnewdest %f %f %f\n",dest.x,dest.y,dest.z);}
       velocity = dest - pos;
+      if(COLLISION_PRINTF){printf("\tnewvel %f %f %f\n",velocity.x,velocity.y,velocity.z);}
     } else if(i==1){
+      //DoubleVector3d second_plane_p = touchPoint;
       DoubleVector3d second_plane_p = collision.nearestPolygonIntersectionPoint;
       DoubleVector3d second_plane_n = touchPoint - collision.nearestPolygonIntersectionPoint;
-      printf("plane %f %f %f n %f %f %f\n",second_plane_p.x,second_plane_p.y,second_plane_p.z, second_plane_n.x,second_plane_n.y,second_plane_n.z);
+
+      if(COLLISION_PRINTF){printf("\tplane %f %f %f n %f %f %f\n",second_plane_p.x,second_plane_p.y,second_plane_p.z, second_plane_n.x,second_plane_n.y,second_plane_n.z);}
 
       DoubleVector3d crease = wedge(first_plane_n,second_plane_n).normalized();
       
@@ -122,7 +133,8 @@ DoubleVector3d Camera::collideWithWorld(DoubleVector3d pos, DoubleVector3d veloc
     }
   }
 
-      return pos;
+  if(COLLISION_PRINTF){printf("return %f %f %f\n",pos.x,pos.y,pos.z);}
+  return pos;
 }
 
 

@@ -210,7 +210,7 @@ void Display(void){
       ovrEyeType eyet = Hmd->EyeRenderOrder[eye];
       EyeRenderPose[eye] = ovrHmd_GetEyePose(Hmd, eyet);
 
-    printf("DO E %d\n",eye);
+      //printf("DO E %d\n",eye);
 
     level->camera->eye = eye;
 

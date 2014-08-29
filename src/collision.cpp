@@ -17,7 +17,7 @@
 // ----------------------------------------------------------------------------
 
 
-
+const bool COLLISION_PRINTF = false;
 
 
 // ----------------------------------------------------------------------
@@ -144,7 +144,7 @@ void Object::CheckCollision(TCollisionPacket* colPackage) {
       // Here we do the error checking to see if we got ourself stuck last frame
       if (CheckPointInSphere(polyIPoint, source, 1.0f)) {
         colPackage->stuck = true;
-        printf("stuck=true polyIPoint %f %f %f, source %f %f %f, dist %f\n",polyIPoint.x, polyIPoint.y, polyIPoint.z, source.x, source.y, source.z, lengthOfVector(polyIPoint-source));
+        if(COLLISION_PRINTF){printf("stuck=true polyIPoint %f %f %f, source %f %f %f, dist %f\n",polyIPoint.x, polyIPoint.y, polyIPoint.z, source.x, source.y, source.z, lengthOfVector(polyIPoint-source));}
       }
       
       // Ok, now we might update the collision data if we hit something
@@ -156,7 +156,7 @@ void Object::CheckCollision(TCollisionPacket* colPackage) {
           colPackage->nearestIntersectionPoint = sIPoint;
           colPackage->nearestPolygonIntersectionPoint = polyIPoint;
           colPackage->foundCollision = true;
-          printf("found collision %s %d\n", this->name.cStr(), i);
+          if(COLLISION_PRINTF){printf("found collision %s %d\n", this->name.cStr(), i);}
           colPackage->object=this;
           //          colPackage->nearestPolygonNormal.x=getVertex(A).normal.x*0.333+getVertex(B).normal.x*0.333+getVertex(C).normal.x*0.333;
           //          colPackage->nearestPolygonNormal.y=getVertex(A).normal.y*0.333+getVertex(B).normal.y*0.333+getVertex(C).normal.y*0.333;
