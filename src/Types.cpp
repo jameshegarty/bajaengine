@@ -111,6 +111,11 @@ FloatVector3d FloatVector3d::normalized(){
 	return t;
 }
 
+DoubleVector3d DoubleVector3d::normalized(){
+	DoubleVector3d t=*this / sqrtf(x * x + y * y + z * z);
+	return t;
+}
+
 
 FloatVector2d FloatVector2d::normalized(){
 	FloatVector2d t=*this / sqrtf(x * x + y * y);
@@ -168,6 +173,12 @@ FloatVector3d::FloatVector3d(float a, float b, float c){
 }
   		
 void FloatVector3d::operator *= (const float s){
+	x *= s;
+	y *= s;
+	z *= s;
+}
+
+void DoubleVector3d::operator *= (const float s){
 	x *= s;
 	y *= s;
 	z *= s;
@@ -242,6 +253,14 @@ DoubleVector3d operator-(const FloatVector3d& left, const DoubleVector3d& right)
 	return final;
 }
 
+DoubleVector3d operator-(const DoubleVector3d& left, const DoubleVector3d& right){
+	DoubleVector3d final;
+	final.x=left.x-right.x;
+	final.y=left.y-right.y;
+	final.z=left.z-right.z;
+	return final;
+}
+
 DoubleVector3d operator-(const DoubleVector3d& left, const FloatVector3d& right){
 	DoubleVector3d final;
 	final.x=left.x-right.x;
@@ -267,6 +286,16 @@ FloatVector3d operator-(const FloatVector3d& left, const FloatVector3d& right){
 
 FloatVector3d operator-(const FloatVector3d& input){
 	FloatVector3d final;
+    		
+	final.x=-input.x;
+	final.y=-input.y;
+	final.z=-input.z;
+	return final;
+}
+
+
+DoubleVector3d operator-(const DoubleVector3d& input){
+	DoubleVector3d final;
     		
 	final.x=-input.x;
 	final.y=-input.y;
@@ -308,6 +337,14 @@ FloatVector3d operator*(const float& right, const FloatVector3d& left){
 	return final;
 }
 
+DoubleVector3d operator*(const double& right, const DoubleVector3d& left){
+	DoubleVector3d final;
+	final.x=left.x*right;
+	final.y=left.y*right;
+	final.z=left.z*right;
+	return final;
+}
+
 FloatVector3d operator/(const FloatVector3d& left, const float& right){
 	FloatVector3d final;
 	final.x=left.x/right;
@@ -338,6 +375,12 @@ void operator+=(DoubleVector3d& right, const FloatVector3d& left) {
 
 
 void FloatVector3d::operator-=(const FloatVector3d& left) {
+	x -= left.x;
+	y -= left.y;
+	z -= left.z;
+}
+
+void DoubleVector3d::operator-=(const DoubleVector3d& left) {
 	x -= left.x;
 	y -= left.y;
 	z -= left.z;

@@ -15,7 +15,7 @@ class Camera{
 						FloatVector3d& velocityVector, 
 						FloatVector3d& gravityVector);
 
-		FloatVector3d collideWithWorld(FloatVector3d sourcePoint, FloatVector3d velocityVector);
+		DoubleVector3d collideWithWorld(DoubleVector3d sourcePoint, DoubleVector3d velocityVector);
 		
 		
 		TCollisionPacket collision;
@@ -25,8 +25,8 @@ class Camera{
 	public:
 		SceneGraphNode* sceneGraphNode;
 
-		FloatVector3d GetPosition(FloatVector3d position, FloatVector3d velocity);
-		FloatVector3d ellipsoidRadius;	//radius of collide elipsoid, aka: scale
+		DoubleVector3d GetPosition(DoubleVector3d position, DoubleVector3d velocity);
+		DoubleVector3d ellipsoidRadius;	//radius of collide elipsoid, aka: scale
 
 		unsigned int sceneGraphLevel;
 

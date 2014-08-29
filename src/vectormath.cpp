@@ -26,19 +26,36 @@
 // Notes : Normalized directional vectors expected
 // Return: distance to plane in world units, -1 if no intersection.
 // -----------------------------------------------------------------------  
-double intersectRayPlane(FloatVector3d rOrigin, FloatVector3d rVector, FloatVector3d pOrigin, FloatVector3d pNormal) {
+double intersectRayPlane(DoubleVector3d rOrigin, DoubleVector3d rVector, DoubleVector3d pOrigin, DoubleVector3d pNormal) {
   
   double d = - (dot(pNormal,pOrigin));
  
   double numer = dot(pNormal,rOrigin) + d;
   double denom = dot(pNormal,rVector);
   
-  if (denom == 0)  // normal is orthogonal to vector, cant intersect
+  if (denom == 0){  // normal is orthogonal to vector, cant intersect
    return (-1.0f);
-   
+  }
+
   return -(numer / denom);	
 }
 
+double plane_dist(DoubleVector3d planeOrigin, DoubleVector3d planeNormal, DoubleVector3d point){
+  //double nom = dot(planeNormal, point);
+  //double denom = sqrt(planeNormal.x*planeNormal.x+planeNormal.y*planeNormal.y+planeNormal.z*planeNormal.z);
+  //return nom/denom;
+  //  return intersectRayPlane(point, -planeNormal, planeOrigin, planeNormal);
+  //return dot(planeNormal, point)-planeOrigin;
+
+  double    sb, sn, sd;
+
+  sn = -dot( planeNormal, (point - planeOrigin));
+  sd = dot(planeNormal, planeNormal);
+  sb = sn / sd;
+
+  DoubleVector3d B = point + sb * planeNormal;
+  return (point-B).magnitude();
+}
 
 // ----------------------------------------------------------------------
 // Name  : intersectRaySphere()
@@ -50,9 +67,9 @@ double intersectRayPlane(FloatVector3d rOrigin, FloatVector3d rVector, FloatVect
 // Return: distance to sphere in world units, -1 if no intersection.
 // -----------------------------------------------------------------------  
 
-double intersectRaySphere(FloatVector3d rO, FloatVector3d rV, FloatVector3d sO, double sR) {
+double intersectRaySphere(DoubleVector3d rO, DoubleVector3d rV, DoubleVector3d sO, double sR) {
 	
-   FloatVector3d Q = sO-rO;
+   DoubleVector3d Q = sO-rO;
    
    double c = lengthOfVector(Q);
    double v = dot(Q,rV);
@@ -78,14 +95,14 @@ double intersectRaySphere(FloatVector3d rO, FloatVector3d rV, FloatVector3d sO, 
 // Return: TRUE if point is in triangle, FALSE if not.
 // -----------------------------------------------------------------------  
 
-bool CheckPointInTriangle(FloatVector3d point, FloatVector3d a, FloatVector3d b, FloatVector3d c) {
+bool CheckPointInTriangle(DoubleVector3d point, DoubleVector3d a, DoubleVector3d b, DoubleVector3d c) {
   
   double total_angles = 0.0f;
        
   // make the 3 vectors
-  FloatVector3d v1 = point-a;
-  FloatVector3d v2 = point-b;
-  FloatVector3d v3 = point-c;
+  DoubleVector3d v1 = point-a;
+  DoubleVector3d v2 = point-b;
+  DoubleVector3d v3 = point-c;
   
   normalizeVector(v1);
   normalizeVector(v2);
@@ -112,11 +129,11 @@ bool CheckPointInTriangle(FloatVector3d point, FloatVector3d a, FloatVector3d b,
 // Return: closest point on line segment
 // -----------------------------------------------------------------------  
 
-FloatVector3d closestPointOnLine(FloatVector3d& a, FloatVector3d& b, FloatVector3d& p) {
+DoubleVector3d closestPointOnLine(DoubleVector3d& a, DoubleVector3d& b, DoubleVector3d& p) {
 	
    // Determine t (the length of the vector from ‘a’ to ‘p’)
-   FloatVector3d c = p-a;
-   FloatVector3d V = b-a; 
+   DoubleVector3d c = p-a;
+   DoubleVector3d V = b-a; 
       
    double d = lengthOfVector(V);
       
@@ -151,11 +168,11 @@ FloatVector3d closestPointOnLine(FloatVector3d& a, FloatVector3d& b, FloatVector
 // Return: closest point on line triangle edge
 // -----------------------------------------------------------------------  
 
-FloatVector3d closestPointOnTriangle(FloatVector3d a, FloatVector3d b, FloatVector3d c, FloatVector3d p) {
+DoubleVector3d closestPointOnTriangle(DoubleVector3d a, DoubleVector3d b, DoubleVector3d c, DoubleVector3d p) {
 	
-  FloatVector3d Rab = closestPointOnLine(a, b, p);
-  FloatVector3d Rbc = closestPointOnLine(b, c, p);
-  FloatVector3d Rca = closestPointOnLine(c, a, p);
+  DoubleVector3d Rab = closestPointOnLine(a, b, p);
+  DoubleVector3d Rbc = closestPointOnLine(b, c, p);
+  DoubleVector3d Rca = closestPointOnLine(c, a, p);
     
   double dAB = lengthOfVector(p-Rab);
   double dBC = lengthOfVector(p-Rbc);
@@ -163,7 +180,7 @@ FloatVector3d closestPointOnTriangle(FloatVector3d a, FloatVector3d b, FloatVect
   
   
   double min = dAB;
-  FloatVector3d result = Rab;
+  DoubleVector3d result = Rab;
   
   if (dBC < min) {
     min = dBC;
@@ -188,9 +205,9 @@ FloatVector3d closestPointOnTriangle(FloatVector3d a, FloatVector3d b, FloatVect
 // Return: TRUE if point is in sphere, FALSE if not.
 // -----------------------------------------------------------------------  
 
-bool CheckPointInSphere(FloatVector3d point, FloatVector3d sO, double sR) {
+bool CheckPointInSphere(DoubleVector3d point, DoubleVector3d sO, double sR) {
 	
- float d = lengthOfVector(point-sO);
+ double d = lengthOfVector(point-sO);
  
  if(d<= sR) return true;
  return false;	
@@ -207,16 +224,16 @@ bool CheckPointInSphere(FloatVector3d point, FloatVector3d sO, double sR) {
 // Notes : 
 // Return: a unit normal vector to the tangent plane of the ellipsoid in the point.
 // -----------------------------------------------------------------------  
-FloatVector3d tangentPlaneNormalOfEllipsoid(FloatVector3d point, FloatVector3d eO, FloatVector3d eR) {
+DoubleVector3d tangentPlaneNormalOfEllipsoid(DoubleVector3d point, DoubleVector3d eO, DoubleVector3d eR) {
 
- FloatVector3d p = point - eO;
+ DoubleVector3d p = point - eO;
 
  double a2 = eR.x * eR.x;
  double b2 = eR.y * eR.y;
  double c2 = eR.z * eR.z;
 
  
- FloatVector3d res;
+ DoubleVector3d res;
  res.x = p.x / a2;
  res.y = p.y / b2;
  res.z = p.z / c2;
@@ -236,9 +253,9 @@ FloatVector3d tangentPlaneNormalOfEllipsoid(FloatVector3d point, FloatVector3d e
 // Return: One of 3 classification codes
 // -----------------------------------------------------------------------  
 
-int classifyPoint(FloatVector3d point, FloatVector3d pO, FloatVector3d pN) {
+int classifyPoint(DoubleVector3d point, DoubleVector3d pO, DoubleVector3d pN) {
 
- FloatVector3d dir = pO - point;
+ DoubleVector3d dir = pO - point;
  double d = dot(dir, pN);
  
  if (d<-0.001f)

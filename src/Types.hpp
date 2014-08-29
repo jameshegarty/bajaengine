@@ -217,6 +217,7 @@ class DoubleVector3d{
   		void operator*=(const float s);
 		DoubleVector3d& operator*=(FloatVector3d& s);
 		void operator-=(const FloatVector3d& left);
+		void operator-=(const DoubleVector3d& left);
 
   		DoubleVector3d();
   		DoubleVector3d(float a, float b, float c);
@@ -241,6 +242,7 @@ DoubleVector3d operator-(const DoubleVector3d& left, const DoubleVector3d& right
 DoubleVector3d operator-(const DoubleVector3d& left, const FloatVector3d& right);
 DoubleVector3d operator-(const FloatVector3d& left, const DoubleVector3d& right);
 DoubleVector3d operator-(const DoubleVector3d& input);
+DoubleVector3d operator*(const double& right, const DoubleVector3d& left);
 
 void operator+=(DoubleVector3d& left, const FloatVector3d& right);
 

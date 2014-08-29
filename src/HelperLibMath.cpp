@@ -258,6 +258,7 @@ FloatVector3d Math::normalize(FloatVector3d input){
 	return final;
 }
 
+
 FloatVector3d Math::normalize(int max, FloatVector3d input){
 
 

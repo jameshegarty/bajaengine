@@ -9,7 +9,7 @@ Physics physics;
 
 Physics::Physics(){
 	gravity.y=-10;
-	gravity.y=-1;
+  //	gravity.y=-1;
 	collide="slide";
 
 #ifdef ODE

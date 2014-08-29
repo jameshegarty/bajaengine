@@ -275,7 +275,8 @@ void Camera::move(){
 	}else if(!freeze){
 		gravityVelocityHack+=physics.gravity*(engineTime.time*0.05);
 
-		newPos+=gravityVelocityHack;
+		//newPos+=gravityVelocityHack;
+    newPos += physics.gravity*(engineTime.time*0.05);
 
 		EngineTime().startTimer("collide");
 		
@@ -296,7 +297,7 @@ void Camera::move(){
 		if(rot.x<limitXMin){rot.x=limitXMin;}
 	}
 
-	glLoadIdentity();
+  //	glLoadIdentity();
 
   /*  
   OVR::Posef pose = EyeRenderPose[eye];
@@ -323,8 +324,8 @@ void Camera::move(){
 
 	//glTranslatef(-pos.x-rScale*EyeRenderPose[eye].Position.x, -pos.y-rScale*EyeRenderPose[eye].Position.y, -pos.z-rScale*EyeRenderPose[eye].Position.z);
 
-  Matrix4f view = CalculateViewFromPose(EyeRenderPose[eye]);
-  glLoadTransposeMatrixf((float*)view.M);
+  //  Matrix4f view = CalculateViewFromPose(EyeRenderPose[eye]);
+  //  glLoadTransposeMatrixf((float*)view.M);
 
   //  glScalef(0.5f,0.5f,0.5f);
 }

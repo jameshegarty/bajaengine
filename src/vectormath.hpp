@@ -18,37 +18,37 @@
 
 
 // basic vector operations (inlined)
-inline float dot(FloatVector3d& v1, FloatVector3d& v2) {
+inline double dot(const DoubleVector3d& v1, const DoubleVector3d& v2) {
  return ( v1.x * v2.x + v1.y * v2.y + v1.z * v2.z );	
 }
 
-inline void normalizeVector(FloatVector3d& v) {
- float len = sqrt(v.x*v.x + v.y*v.y + v.z*v.z);	
+inline void normalizeVector(DoubleVector3d& v) {
+ double len = sqrt(v.x*v.x + v.y*v.y + v.z*v.z);	
  v.x /= len;
  v.y /= len;
  v.z /= len;
 }
 
-inline double lengthOfVector(FloatVector3d v) {
+inline double lengthOfVector(DoubleVector3d v) {
  return (sqrt(v.x * v.x + v.y * v.y + v.z * v.z));
 }
 
-inline void setLength(FloatVector3d& v, float l) {
- float len = sqrt(v.x*v.x + v.y*v.y + v.z*v.z);	
+inline void setLength(DoubleVector3d& v, double l) {
+ double len = sqrt(v.x*v.x + v.y*v.y + v.z*v.z);	
  v.x *= l/len;
  v.y *= l/len;
  v.z *= l/len;
 } 
 
-inline bool isZeroVector(FloatVector3d& v) {
+inline bool isZeroVector(DoubleVector3d& v) {
  if ((v.x == 0.0f) && (v.y == 0.0f) && (v.z == 0.0f))
    return true;
    
   return false;	
 }
 
-inline FloatVector3d wedge(FloatVector3d v1, FloatVector3d v2) {
- FloatVector3d result;
+inline DoubleVector3d wedge(DoubleVector3d v1, DoubleVector3d v2) {
+ DoubleVector3d result;
  
  result.x = (v1.y * v2.z) - (v2.y * v1.z);
  result.y = (v1.z * v2.x) - (v2.z * v1.x);
@@ -61,23 +61,24 @@ inline FloatVector3d wedge(FloatVector3d v1, FloatVector3d v2) {
 
 // ray intersections. All return -1.0 if no intersection, otherwise the distance along the 
 // ray where the (first) intersection takes place
-double      intersectRayPlane(FloatVector3d rOrigin, FloatVector3d rVector, FloatVector3d pOrigin, FloatVector3d pNormal); 
-double      intersectRaySphere(FloatVector3d rO, FloatVector3d rV, FloatVector3d sO, double sR);
+double      intersectRayPlane(DoubleVector3d rOrigin, DoubleVector3d rVector, DoubleVector3d pOrigin, DoubleVector3d pNormal); 
+double      intersectRaySphere(DoubleVector3d rO, DoubleVector3d rV, DoubleVector3d sO, double sR);
 
+double plane_dist(DoubleVector3d planeOrigin, DoubleVector3d planeNormal, DoubleVector3d point);
 
 // Distance to line of triangle
-FloatVector3d  closestPointOnLine(FloatVector3d& a, FloatVector3d& b, FloatVector3d& p);
-FloatVector3d  closestPointOnTriangle(FloatVector3d a, FloatVector3d b, FloatVector3d c, FloatVector3d p);
+DoubleVector3d  closestPointOnLine(DoubleVector3d& a, DoubleVector3d& b, DoubleVector3d& p);
+DoubleVector3d  closestPointOnTriangle(DoubleVector3d a, DoubleVector3d b, DoubleVector3d c, DoubleVector3d p);
 
 // point inclusion
-bool CheckPointInTriangle(FloatVector3d point ,FloatVector3d a, FloatVector3d b, FloatVector3d c);
-bool CheckPointInSphere(FloatVector3d point, FloatVector3d sO, double sR);
+bool CheckPointInTriangle(DoubleVector3d point ,DoubleVector3d a, DoubleVector3d b, DoubleVector3d c);
+bool CheckPointInSphere(DoubleVector3d point, DoubleVector3d sO, double sR);
 
 // Normal generation
-FloatVector3d tangentPlaneNormalOfEllipsoid(FloatVector3d point,FloatVector3d eO, FloatVector3d eR);
+DoubleVector3d tangentPlaneNormalOfEllipsoid(DoubleVector3d point,DoubleVector3d eO, DoubleVector3d eR);
 
 // Point classification
-int classifyPoint(FloatVector3d point, FloatVector3d pO, FloatVector3d pN);
+int classifyPoint(DoubleVector3d point, DoubleVector3d pO, DoubleVector3d pN);
 
 
 #endif // VECTOR_MATH_H

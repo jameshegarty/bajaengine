@@ -200,7 +200,8 @@ void Display(void){
 		firstFrameHack++;
 	}
 	
-	update();
+	update();      	 
+  level->camera->move();
 
   if(rift){
     ovrFrameTiming hmdFrameTiming = ovrHmd_BeginFrame(Hmd, 0);
@@ -221,7 +222,7 @@ void Display(void){
 
       
       		level->camera->adjust();
-      		level->camera->move();
+      		level->camera->transform();
                 drawLevel();
                 				drawWaterBad();
         //			drawTransparent(0,true,true);
