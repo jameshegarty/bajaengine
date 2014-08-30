@@ -113,6 +113,8 @@ void riftInit(){
   recommenedTex0Size = ovrHmd_GetFovTextureSize(Hmd, ovrEye_Left,  eyesFov[0], DesiredPixelDensity);
   recommenedTex1Size = ovrHmd_GetFovTextureSize(Hmd, ovrEye_Right, eyesFov[1], DesiredPixelDensity);
 
+  conf->renderTargetSizeX = recommenedTex0Size.w;
+  conf->renderTargetSizeY = recommenedTex0Size.h;
   //  conf->widescreen=false;
   //  conf->sizeX = recommenedTex0Size.w;
   //  conf->sizeY = recommenedTex0Size.h;
@@ -148,7 +150,7 @@ void riftInit(){
   }
 
   for(int eye=0; eye<2; eye++){
-    riftProjection[eye] = ovrMatrix4f_Projection( EyeRenderDesc[eye].Fov, 0.01f, 1000.f, true );
+    riftProjection[eye] = ovrMatrix4f_Projection( EyeRenderDesc[eye].Fov, level->camera->clipNear, level->camera->clipFar, true );
 
     glGenFramebuffers(1, &(eyeTexBuffer[eye]));
     glBindFramebuffer(GL_FRAMEBUFFER, eyeTexBuffer[eye]);
@@ -211,36 +213,35 @@ void Display(void){
       EyeRenderPose[eye] = ovrHmd_GetEyePose(Hmd, eyet);
 
       //printf("DO E %d\n",eye);
-
-    level->camera->eye = eye;
-
+      
+      level->camera->eye = eye;
+      
       glBindFramebuffer(GL_FRAMEBUFFER, eyeTexBuffer[eye]);
       glViewport(0,0,recommenedTex0Size.w,recommenedTex0Size.h);
-
-		glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      
+      glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glEnable(GL_DEPTH_TEST);
-
       
-      		level->camera->adjust();
-      		level->camera->transform();
-                drawLevel();
-                				drawWaterBad();
-        //			drawTransparent(0,true,true);
-      //drawTransparent(level->water->pos.y,true,false);
-
-                                drawPanels();
-                drawMouse();
       
-		console().draw();
 
-      //                    Draw ();
+      level->camera->adjust();
+      level->camera->transform();
+      drawLevel();
+      drawWaterBad();
+      //drawTransparent(0,true,true);
+      drawTransparent(level->water->pos.y,true,false);
+      
+      drawPanels();
+      drawMouse();
+      
+      console().draw();
       }
 
       ovrHmd_EndFrame(Hmd, EyeRenderPose, (ovrTexture*)EyeTexture);
   //	glutSwapBuffers();
   }else{
     Draw ();
-glutSwapBuffers();
+    glutSwapBuffers();
   }
 }
 

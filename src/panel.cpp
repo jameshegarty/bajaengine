@@ -621,47 +621,47 @@ void Panel::draw(){
 
 		
 		if(smartCenter!=0 && percent){
-			if( (conf->sizeX*(1/smartCenter)) > conf->sizeY){
+			if( (conf->renderTargetSizeX*(1/smartCenter)) > conf->renderTargetSizeY){
 				//if wider than tall
-				xs=xs*conf->sizeY*smartCenter;
-				ys=ys*conf->sizeY;
+				xs=xs*conf->renderTargetSizeY*smartCenter;
+				ys=ys*conf->renderTargetSizeY;
 				
-				zs=zs*conf->sizeY*smartCenter;
-				ws=ws*conf->sizeY;
+				zs=zs*conf->renderTargetSizeY*smartCenter;
+				ws=ws*conf->renderTargetSizeY;
 
-				xs+=(conf->sizeX-(conf->sizeY*smartCenter))/2;
+				xs+=(conf->renderTargetSizeX-(conf->renderTargetSizeY*smartCenter))/2;
 
 
 				
 
-			}else if( (conf->sizeY*(smartCenter)) > conf->sizeX){
+			}else if( (conf->renderTargetSizeY*(smartCenter)) > conf->renderTargetSizeX){
 				//if taller than wide
 
-				xs=xs*conf->sizeX;
-				ys=ys*conf->sizeX*(1/smartCenter);
+				xs=xs*conf->renderTargetSizeX;
+				ys=ys*conf->renderTargetSizeX*(1/smartCenter);
 
-				zs=zs*conf->sizeX;
-				ws=ws*conf->sizeX*(1/smartCenter);
+				zs=zs*conf->renderTargetSizeX;
+				ws=ws*conf->renderTargetSizeX*(1/smartCenter);
 
-				float adj=(conf->sizeY-(conf->sizeX*(1/smartCenter)))/2;
+				float adj=(conf->renderTargetSizeY-(conf->renderTargetSizeX*(1/smartCenter)))/2;
 				ys-=adj;
 		
 				
 
 			}
 
-			ys=conf->sizeY+ys-ws;
+			ys=conf->renderTargetSizeY+ys-ws;
 		}else if(percent  && smartCenter==0){
 			ys=+scissorStore.w;
 
-			xs*=conf->sizeX;
-			ys*=conf->sizeY;
-			zs*=conf->sizeX;
-			ws*=conf->sizeY;
+			xs*=conf->renderTargetSizeX;
+			ys*=conf->renderTargetSizeY;
+			zs*=conf->renderTargetSizeX;
+			ws*=conf->renderTargetSizeY;
 
-			ys=conf->sizeY+scissorStore.y-ws;
+			ys=conf->renderTargetSizeY+scissorStore.y-ws;
 		}else{
-			ys=conf->sizeY+ys-ws;
+			ys=conf->renderTargetSizeY+ys-ws;
 		}
 
 
@@ -709,50 +709,50 @@ void Panel::draw(){
 	float ratio=scale.x/scale.y;
 
 	if(smartCenter!=0){
-			if( (conf->sizeX*(1/smartCenter)) > conf->sizeY){
+			if( (conf->renderTargetSizeX*(1/smartCenter)) > conf->renderTargetSizeY){
 				//if wider than tall
-				px=pos.x*conf->sizeY*smartCenter;
-				py=pos.y*conf->sizeY;
+				px=pos.x*conf->renderTargetSizeY*smartCenter;
+				py=pos.y*conf->renderTargetSizeY;
 
 
-				sx=scale.x*conf->sizeY*smartCenter;
-				sy=scale.y*conf->sizeY;
+				sx=scale.x*conf->renderTargetSizeY*smartCenter;
+				sy=scale.y*conf->renderTargetSizeY;
 
-				px+=(conf->sizeX-(conf->sizeY*smartCenter))/2;
+				px+=(conf->renderTargetSizeX-(conf->renderTargetSizeY*smartCenter))/2;
 
-			}else if( (conf->sizeY*(smartCenter)) > conf->sizeX){
+			}else if( (conf->renderTargetSizeY*(smartCenter)) > conf->renderTargetSizeX){
 				//if taller than wide
 
-				px=pos.x*conf->sizeX;
-				py=pos.y*conf->sizeX*(1/smartCenter);
+				px=pos.x*conf->renderTargetSizeX;
+				py=pos.y*conf->renderTargetSizeX*(1/smartCenter);
 
 
-				sx=scale.x*conf->sizeX;
-				sy=scale.y*conf->sizeX*(1/smartCenter);
+				sx=scale.x*conf->renderTargetSizeX;
+				sy=scale.y*conf->renderTargetSizeX*(1/smartCenter);
 
-				float adj=(conf->sizeY-(conf->sizeX*(1/smartCenter)))/2;
+				float adj=(conf->renderTargetSizeY-(conf->renderTargetSizeX*(1/smartCenter)))/2;
 				py-=adj;
 		
 			}else{
 
 				//it is in an exact ratio, so no weird stuff needed
 
-				px=pos.x*conf->sizeX;
-				py=pos.y*conf->sizeY;
+				px=pos.x*conf->renderTargetSizeX;
+				py=pos.y*conf->renderTargetSizeY;
 
 
-				sx=scale.x*conf->sizeX;
-				sy=scale.y*conf->sizeY;
+				sx=scale.x*conf->renderTargetSizeX;
+				sy=scale.y*conf->renderTargetSizeY;
 
 			}
 	}
 
 	if(percent  && smartCenter==0){
-		sx=scale.x*conf->sizeX;
-		sy=scale.y*conf->sizeY;
+		sx=scale.x*conf->renderTargetSizeX;
+		sy=scale.y*conf->renderTargetSizeY;
 
-		px=pos.x*conf->sizeX;
-		py=pos.y*conf->sizeY;
+		px=pos.x*conf->renderTargetSizeX;
+		py=pos.y*conf->renderTargetSizeY;
 	}
 
 	if(keepAspectRatio){
@@ -786,8 +786,8 @@ void Panel::draw(){
 
 
 	if(center  && smartCenter==0){
-		px=(conf->sizeX/2)-(sx/2);
-		py=(-conf->sizeY/2)-(-sy/2);
+		px=(conf->renderTargetSizeX/2)-(sx/2);
+		py=(-conf->renderTargetSizeY/2)-(-sy/2);
 	}
 
 	

@@ -131,6 +131,11 @@ private:
     float riftIpd;
     float riftScale;
 
+    // maybe the same as sizeX and sizeY, but not necessarily.
+    // rift draws on a render target larger than the window size.
+    float renderTargetSizeX;
+    float renderTargetSizeY;
+
 		Conf();
 		bool load();
 		bool save();

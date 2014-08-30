@@ -207,7 +207,7 @@ void drawPanels(){
 	//clear the depth info from the 3d objects, so that they don't overlap the panels
 	glClear (GL_DEPTH_BUFFER_BIT);
 
-	glViewport (0, 0, (GLsizei)(conf->sizeX), (GLsizei)(conf->sizeY));
+	glViewport (0, 0, (GLsizei)(conf->renderTargetSizeX), (GLsizei)(conf->renderTargetSizeY));
 
 	glMatrixMode (GL_TEXTURE);										// Select The Modelview Matrix
 		glLoadIdentity ();	
@@ -215,7 +215,7 @@ void drawPanels(){
 	glMatrixMode (GL_PROJECTION);										// Select The Projection Matrix
 	glLoadIdentity ();
 
-	glOrtho(0,conf->sizeX,-conf->sizeY,0,-100,100);
+	glOrtho(0,conf->renderTargetSizeX,-conf->renderTargetSizeY,0,-100,100);
 
 	glMatrixMode (GL_MODELVIEW);										// Select The Modelview Matrix
 

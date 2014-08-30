@@ -283,5 +283,6 @@ bool Engine::init(){
 		LuaType* rift=script().add("rift",lluaa);			
       script().add("ipd",&conf->riftIpd,rift);
       script().add("scale",&conf->riftScale,rift);
+
 	return true;
 }
