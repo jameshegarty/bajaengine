@@ -22,6 +22,9 @@ const bool COLLISION_PRINTF = false;
 //-----------------------------------------------------------------------------
 DoubleVector3d Camera::GetPosition(DoubleVector3d position, DoubleVector3d velocity) {
 
+  assert(position.x==position.x);
+  assert(velocity.x==velocity.x);
+
   if(COLLISION_PRINTF){printf("GetPosition %f %f %f, %f %f %f\n",position.x,position.y,position.z, velocity.x, velocity.y, velocity.z);}
 
 	collided=false;
@@ -36,7 +39,7 @@ DoubleVector3d Camera::GetPosition(DoubleVector3d position, DoubleVector3d veloc
 	
  // call the recursive collision response function	
  finalPosition = collideWithWorld(scaledPosition, scaledVelocity);
- 	
+ assert(finalPosition.x==finalPosition.x);
  // when the function returns the result is still in ellipsoid space, so
  // we have to scale it back to R3 before we return it 	
  finalPosition = finalPosition * ellipsoidRadius;
@@ -58,7 +61,8 @@ DoubleVector3d Camera::collideWithWorld(DoubleVector3d pos, DoubleVector3d veloc
  
  
   DoubleVector3d dest = pos + velocity;
- 
+  assert(dest.x==dest.x);
+
   DoubleVector3d first_plane_p;
   DoubleVector3d first_plane_n;
 
@@ -86,6 +90,7 @@ DoubleVector3d Camera::collideWithWorld(DoubleVector3d pos, DoubleVector3d veloc
     
     if (collision.foundCollision == false){ 
       if(COLLISION_PRINTF){printf("no collision, return %f %f %f\n",dest.x, dest.y, dest.z);}
+      assert(dest.x==dest.x);
       return dest;
     }
    
@@ -115,6 +120,7 @@ DoubleVector3d Camera::collideWithWorld(DoubleVector3d pos, DoubleVector3d veloc
       double pdist = plane_dist(first_plane_p, first_plane_n, dest);
       if(COLLISION_PRINTF){printf("\tpdist %f\n",pdist);}
       dest -= (pdist - long_radius) * first_plane_n; // project onto plane
+      assert(dest.x==dest.x);
       if(COLLISION_PRINTF){printf("\tnewdest %f %f %f\n",dest.x,dest.y,dest.z);}
       velocity = dest - pos;
       if(COLLISION_PRINTF){printf("\tnewvel %f %f %f\n",velocity.x,velocity.y,velocity.z);}
@@ -125,15 +131,22 @@ DoubleVector3d Camera::collideWithWorld(DoubleVector3d pos, DoubleVector3d veloc
 
       if(COLLISION_PRINTF){printf("\tplane %f %f %f n %f %f %f\n",second_plane_p.x,second_plane_p.y,second_plane_p.z, second_plane_n.x,second_plane_n.y,second_plane_n.z);}
 
-      DoubleVector3d crease = wedge(first_plane_n,second_plane_n).normalized();
-      
-      double dis = dot((dest - pos),crease); 
-      velocity = dis * crease;
-      dest = pos + velocity;
+      DoubleVector3d crease = wedge(first_plane_n,second_plane_n);
+
+      // were the planes parallel?
+      if(crease.magnitude()>0.00000001f){
+        crease = crease.normalized();
+        
+        double dis = dot((dest - pos),crease); 
+        velocity = dis * crease;
+        dest = pos + velocity;
+        assert(dest.x==dest.x);
+      }
     }
   }
 
   if(COLLISION_PRINTF){printf("return %f %f %f\n",pos.x,pos.y,pos.z);}
+  assert(pos.x==pos.x);
   return pos;
 }
 

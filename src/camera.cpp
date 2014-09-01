@@ -186,6 +186,8 @@ void Camera::move(){
 	float strife=0;
 	FloatVector3d newPos;
 
+  assert(pos.x==pos.x);
+
 	if(console().visible){
 		pspeed=0;
 	}
@@ -282,7 +284,8 @@ void Camera::move(){
 		
 		pos=GetPosition(pos,newPos);
 
-		
+    assert(pos.x==pos.x);
+
 		if(collided){
 			gravityVelocityHack.x=0;
 			gravityVelocityHack.y=0;
