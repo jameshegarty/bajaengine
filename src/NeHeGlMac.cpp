@@ -28,6 +28,7 @@ extern "C"{
 #include "editor.h"
 
 #include "draw.hpp"
+#include "reflect.h"
 
 int nativeY;
 #define MAC_HIDE_MOUSE 1
@@ -228,8 +229,9 @@ void Display(void){
       level->camera->transform();
       drawLevel();
       drawWaterBad();
-      //drawTransparent(0,true,true);
-      drawTransparent(level->water->pos.y,true,false);
+      drawReflectiveObjectsBad();
+      drawTransparent(0,true,true);
+      //drawTransparent(level->water->pos.y,true,false);
       
       drawPanels();
       drawMouse();

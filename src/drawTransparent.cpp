@@ -64,7 +64,7 @@ void buildTransparentList(){
 				glNewList(level->transparentObjects[i]->glListName,GL_COMPILE);
 				a[0]=level->transparentObjects[i];
 
-				drawArray(&a,false);
+        drawArray(&a,false);
 
 				glEndList();	
  
@@ -182,7 +182,7 @@ void drawTransparent(float yvalue,bool above,bool nowater){
 	
 
 	//it's better for stuff to get drawn in the wrong order than not drawn at all...
-	glDepthMask(0);
+	glDepthMask(GL_FALSE);
 
 	shader.reset();
 
@@ -243,8 +243,7 @@ void drawTransparent(float yvalue,bool above,bool nowater){
 	}else if(conf->optimize=="list" || conf->optimize=="modern"){
 		buildTransparentList();
 		
-		for(int i=0; i<final.size(); i++){
-
+    for(int i=0; i<final.size(); i++){
 			if(level->materials[final[i]->material].shader & MATERIAL_SHADER_ENVIRONMENT &&
 #ifdef FEATURE_CUBIC_ENVIRONMENT_MAPS
 true
@@ -303,7 +302,7 @@ false
 				glDisable(GL_TEXTURE_GEN_T);
 				glDisable(GL_TEXTURE_GEN_R);
 				glDisable(GL_TEXTURE_GEN_Q);
-			}
+        }
 
 			#ifndef SOFTWARE_TRANSFORMS
 				glMatrixMode(GL_MODELVIEW);
@@ -345,22 +344,25 @@ false
 				level->camera->clipFar=of;
 				level->camera->clipNear=on;
 
-			}
+        }
+
 
 			glCallList(final[i]->glListName);
+
 
 			if(final[i]->noclip){
 				glMatrixMode(GL_PROJECTION);
 				glPopMatrix();
 				glMatrixMode(GL_MODELVIEW);
-			}
+        }
 
-			#ifndef SOFTWARE_TRANSFORMS
+#ifndef SOFTWARE_TRANSFORMS
 				glPopMatrix();
-			#endif
-		}
+#endif
+      }
+  }
 
-	}
-	glDepthMask(1);
+
+	glDepthMask(GL_TRUE);
 
 }

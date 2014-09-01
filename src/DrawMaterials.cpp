@@ -150,7 +150,7 @@ bool envReset=true;
 bool shadReset=true;
 
 void updateMaterial(Object* obj,bool transform){
-	
+
 	if(shadReset || !transform){	//when transform==false, we are building nonstatic objs, where THE ORDER CAN CHANGE, so we always need to reset the shader
 
 		glDisable(GL_ALPHA_TEST);
@@ -239,6 +239,7 @@ void updateMaterial(Object* obj,bool transform){
 		glMatrixMode(GL_MODELVIEW);
 
 	}
+
 
 	if(obj->material!=-1){
 
@@ -706,22 +707,27 @@ void updateMaterial(Object* obj,bool transform){
 			glActiveTextureARB(GL_TEXTURE3_ARB);
 			glDisable(GL_TEXTURE_2D);
 			glDisable(GL_TEXTURE_CUBE_MAP_ARB);
-		}else{
+      }else{
 			//plain boring nothing shader
-			glActiveTextureARB(GL_TEXTURE0_ARB);
-			glEnable(GL_TEXTURE_2D);
-			glDisable(GL_TEXTURE_CUBE_MAP_ARB);
 
-			glColor4f(level->materials[obj->material].diffuse.x,
-				level->materials[obj->material].diffuse.y,
-				level->materials[obj->material].diffuse.z,
-				level->materials[obj->material].diffuse.w);
-			
+
 			if(textureDiffuse!=-1){
-				glColor4f(1,1,1,level->materials[obj->material].diffuse.w);	//textured objs always full bright
-				glBindTexture(GL_TEXTURE_2D,level->textures[textureDiffuse].glName());
-				shadReset=true;
-			}
+    			glActiveTextureARB(GL_TEXTURE0_ARB);
+          glEnable(GL_TEXTURE_2D);
+          glDisable(GL_TEXTURE_CUBE_MAP_ARB);
+          
+          glColor4f(1,1,1,level->materials[obj->material].diffuse.w);	//textured objs always full bright
+          glBindTexture(GL_TEXTURE_2D,level->textures[textureDiffuse].glName());
+          shadReset=true;
+      }else{
+        glActiveTextureARB(GL_TEXTURE0_ARB);
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_TEXTURE_CUBE_MAP_ARB);
+        glColor4f(level->materials[obj->material].diffuse.x,
+                  level->materials[obj->material].diffuse.y,
+                  level->materials[obj->material].diffuse.z,
+                  level->materials[obj->material].diffuse.w);
+      }
 
 			if(obj->lightmap==-1){
 				glDisable(GL_LIGHTING);
@@ -749,10 +755,10 @@ void updateMaterial(Object* obj,bool transform){
 				glActiveTextureARB(GL_TEXTURE6_ARB);
 				glDisable(GL_TEXTURE_2D);
 				glDisable(GL_TEXTURE_CUBE_MAP_ARB);
-			}
-		}
+        }
+  }
 
-	}
+    }
 
 	
 }

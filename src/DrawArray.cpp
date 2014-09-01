@@ -197,8 +197,8 @@ void drawArrayInner(Object* object,bool transform){
 	
 	
 	
-	updateLights(object);
-	updateMaterial(object,transform);
+  updateLights(object);
+  updateMaterial(object,transform);
 	
 	
 	bool disp=(conf->displacement  && 
