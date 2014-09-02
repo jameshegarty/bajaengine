@@ -402,11 +402,13 @@ void drawReflectiveObjectsBad(){
 
 		glActiveTextureARB(GL_TEXTURE0_ARB);
 		glEnable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_CUBE_MAP_ARB);
 		glBindTexture(GL_TEXTURE_2D,level->textures[level->materials[level->reflectiveObjects[i]->material].textureDiffuse].glName());
 
 
 		glActiveTextureARB(GL_TEXTURE1_ARB);
 		glEnable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_CUBE_MAP_ARB);
 		glBindTexture(GL_TEXTURE_2D,level->lightmaps[level->reflectiveObjects[i]->lightmap].glName());
 
 
@@ -416,45 +418,43 @@ void drawReflectiveObjectsBad(){
 		glEnable(GL_DEPTH_TEST);
 
 		//set up the sun!~!!
-		glEnable(GL_LIGHTING);
-		GLfloat LightDiffuse[4];
-		LightDiffuse[0]=conf->sunColor.x;
-		LightDiffuse[1]=conf->sunColor.y;
-		LightDiffuse[2]=conf->sunColor.z;
-		LightDiffuse[3]=conf->sunColor.w;
+		glDisable(GL_LIGHTING);
+		glDisable(GL_LIGHT0);
 
-		GLfloat LightPos[4];
-		LightPos[0]=conf->sunPos.x;
-		LightPos[1]=conf->sunPos.y;
-		LightPos[2]=conf->sunPos.z;
-		LightPos[3]=0.0f;
+    int textureDiffuse = level->materials[level->reflectiveObjects[i]->material].textureDiffuse;
 
-		glLightfv(GL_LIGHT0, GL_DIFFUSE,LightDiffuse);
-		glLightfv(GL_LIGHT0, GL_POSITION,LightPos);
-		glEnable(GL_LIGHT0);
-
-		glColor4f(level->materials[level->reflectiveObjects[i]->material].diffuse.x,
-			level->materials[level->reflectiveObjects[i]->material].diffuse.y,
-			level->materials[level->reflectiveObjects[i]->material].diffuse.z,
-			level->materials[level->reflectiveObjects[i]->material].diffuse.w);
+    if(textureDiffuse!=-1){
+      glColor4f(1,1,1,level->materials[level->reflectiveObjects[i]->material].diffuse.w);	//textured objs always full bright
+    }else{
+      glColor4f(level->materials[level->reflectiveObjects[i]->material].diffuse.x,
+                level->materials[level->reflectiveObjects[i]->material].diffuse.y,
+                level->materials[level->reflectiveObjects[i]->material].diffuse.z,
+                level->materials[level->reflectiveObjects[i]->material].diffuse.w);
+    }
 
 		glActiveTextureARB(GL_TEXTURE3_ARB);
 		glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_CUBE_MAP_ARB);
 
 		glActiveTextureARB(GL_TEXTURE4_ARB);
 		glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_CUBE_MAP_ARB);
 
 		glActiveTextureARB(GL_TEXTURE5_ARB);
 		glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_CUBE_MAP_ARB);
 
 		glActiveTextureARB(GL_TEXTURE6_ARB);
 		glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_CUBE_MAP_ARB);
 
 		glActiveTextureARB(GL_TEXTURE7_ARB);
 		glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_CUBE_MAP_ARB);
 
 		glActiveTextureARB(GL_TEXTURE8_ARB);
 		glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_CUBE_MAP_ARB);
 
 		glActiveTextureARB(GL_TEXTURE0_ARB);
 
